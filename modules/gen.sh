@@ -22,9 +22,9 @@ for f in *.yaml ; do
 	yq e .testperl $f > ../t/${rank}_$name.t
 	yq e .testdata $f > ../t/$name.tdata
 
-	echo -e "#include \"minihdl.h\"\n#include \"modules.h\"\n\nint main(){\n" > $name.cpp
+	echo -e "#include \"minihdl.h\"\n#include \"modules.h\"\n\nint main(){\ninit() ; \n" > $name.cpp
 	yq e .test $f >> $name.cpp
-	echo -e "}\n" >> $name.cpp
+	echo -e "done() ;\n}\n" >> $name.cpp
 done
 
 cat <<H >> modules.h

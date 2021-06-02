@@ -1,0 +1,33 @@
+---
+
+header: "class jxor { public: jxor(input wa, input wb, output wc) ; } ;"
+
+source: |
+  jxor::jxor(input wa, input wb, output wc){
+    wire wic, wid, wie, wif ;
+    jnot not1(wa, wic) ;
+    jnot not2(wb, wid) ;
+    jnand nand1(wic, wb, wie) ;
+    jnand nand2(wa, wid, wif) ;
+    jnand nand3(wie, wif, wc) ;
+  }
+
+test: |
+  wire a("a"), b("b"), c("c") ;
+  jxor x(a, b, c) ;
+
+rank: 4
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jxor',
+     [qw(a b)],
+     [qw(c)]) ;
+
+testdata: |
+  00=0
+  01=1
+  10=1
+  11=0

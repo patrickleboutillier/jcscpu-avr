@@ -1,0 +1,31 @@
+---
+
+header: "class jor { public: jor(input wa, input wb, output wc) ; } ;"
+
+source: |
+  jor::jor(input wa, input wb, output wc){
+    wire wic, wid ;
+    jnot n1(wa, wic) ;
+    jnot n2(wb, wid) ;
+    jnand x(wic, wid, wc) ;
+  }
+
+test: |
+  wire a("a"), b("b"), c("c") ;
+  jor x(a, b, c) ;
+
+rank: 4
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jor',
+     [qw(a b)],
+     [qw(c)]) ;
+
+testdata: |
+  00=0
+  01=1
+  10=1
+  11=1

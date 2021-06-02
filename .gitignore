@@ -1,3 +1,8 @@
 *.o
-modules/modules.cpp
-modules/modules.h
+*.t
+modules/*.h
+modules/*.cpp
+modules/*.test
+sim/*.sim
+t/*.t
+t/*.tdata

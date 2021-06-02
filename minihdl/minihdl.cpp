@@ -9,7 +9,7 @@ unsigned int gatecnt = 0 ;
 
 wire::wire(){ 
  	_id = wirecnt++ ;
-	printf("WIRE %d\n", _id) ;
+	// printf("WIRE %d\n", _id) ;
 } ;
 
 
@@ -26,4 +26,15 @@ unsigned int wire::id(){
 
 nand::nand(wire a, wire b, wire c){ 
  	printf("NAND %d %d %d\n", a.id(), b.id(), c.id()) ; 
+	gatecnt++ ;
+}
+
+
+void init(){
+}
+
+
+void done(){
+ 	printf("# wirecnt = %d\n", wirecnt) ; 
+ 	printf("# gatecnt = %d\n", gatecnt) ; 
 }

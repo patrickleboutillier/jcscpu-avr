@@ -17,6 +17,7 @@ sub simhdl {
 	while (<SIM>){
 		my $line = $_ ;
 		chomp($line) ;
+		next if $line =~ /^#/ ;
 
 		my ($verb, @args) = split(/\s+/, $line) ;
 		if ($verb eq 'WIRE'){

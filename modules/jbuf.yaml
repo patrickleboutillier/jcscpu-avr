@@ -1,0 +1,26 @@
+---
+
+header: "class jbuf { public: jbuf(input wa, input wb) ; } ;"
+
+source: |
+  jbuf::jbuf(input wa, input wb){
+  	jand x(wa, wa, wb) ;
+  }
+
+test: |
+  wire a("a"), b("b") ;
+  jbuf x(a, b) ;
+
+rank: 2
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jbuf',
+     [qw(a)],
+     [qw(b)]) ;
+
+testdata: |
+  0=0
+  1=1
