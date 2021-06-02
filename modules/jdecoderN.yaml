@@ -1,0 +1,56 @@
+---
+
+header: "class jdecoderN { public: jdecoderN(int n, int n2, input bis[], output bos[]) ; } ;"
+
+source: |
+  jdecoderN::jdecoderN(int n, int n2, input bis[], output bos[]){
+    wire wmap[n][2] ;
+  
+    // Create our wire map
+    for (int j = n-1; j >= 0 ; j = j - 1){
+      jnot notj(bis[j], wmap[j][0]) ;
+      jbuf b(bis[j], wmap[j][1]) ;
+    }
+    
+    for (int j = n2-1; j >= 0 ; j = j - 1){
+      wire wos[n] ;
+      for (int k = n-1; k >= 0 ; k = k - 1){
+        int bit = (j >> (n-1-k)) & 1 ;
+        jbuf b(wmap[k][bit], wos[k]) ;
+      }
+      jandN andNj(n, wos, bos[n2-1-j]) ;
+    }      
+  }
+
+test: |
+  wire *bis = wire::bus(4, "bis") ;
+  wire *bos = wire::bus(16, "bos") ;
+  jdecoderN x(4, 16, bis, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jdecoderN',
+    [bus('bis', 4)],
+    [bus('bos', 16)]) ;
+
+testdata: |
+  0000=0000000000000001
+  0001=0000000000000010
+  0010=0000000000000100
+  0011=0000000000001000
+  0100=0000000000010000
+  0101=0000000000100000
+  0110=0000000001000000
+  0111=0000000010000000
+  1000=0000000100000000
+  1001=0000001000000000
+  1010=0000010000000000
+  1011=0000100000000000
+  1100=0001000000000000
+  1101=0010000000000000
+  1110=0100000000000000
+  1111=1000000000000000

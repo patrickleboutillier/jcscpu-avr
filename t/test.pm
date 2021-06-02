@@ -36,7 +36,9 @@ sub test {
 		my $wanted = $os ;
 		my @got = '' ;
 		for (my $i = 0 ; $i < scalar(@{$outs}) ; $i++){
-			push @got, getval($outs->[$i]) ;
+			my $v = getval($outs->[$i]) ;
+			$v = 'x' if !defined($v) ;
+			push @got, $v ;
 		}
 		my $got = join('', @got) ;
 		is($got, $wanted, "$is = $wanted") ;

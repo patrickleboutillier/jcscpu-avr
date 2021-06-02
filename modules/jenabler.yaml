@@ -1,0 +1,36 @@
+---
+
+header: "class jenabler { public: jenabler(input bis[8], input we, output bos[8]) ; } ;"
+
+source: |
+  jenabler::jenabler(input bis[8], input we, output bos[8]){
+  	for (int j = 0; j < 8 ; j = j + 1){
+  	  jand a(bis[j], we, bos[j]) ;
+    }
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire *bos = wire::bus(8, "bos") ;
+  wire we("we") ;
+  jenabler x(bis, we, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jenabler',
+    [bus('bis'), qw(we)],
+    [bus('bos')]) ;
+
+testdata: |
+  00000000_0=00000000
+  10000000_0=00000000
+  10001000_0=00000000
+  10001000_1=10001000
+  10000000_1=10000000
+  00000000_1=00000000
+  00000001_1=00000001
+  00000001_0=00000000
