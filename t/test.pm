@@ -33,6 +33,7 @@ sub test {
 			setval($ins->[$i], $is[$i]) ;
 		}
 		my $iter = settle() ;
+		note("Settled after $iter iterations") ;
 		my $wanted = $os ;
 		my @got = '' ;
 		for (my $i = 0 ; $i < scalar(@{$outs}) ; $i++){
@@ -43,6 +44,7 @@ sub test {
 		my $got = join('', @got) ;
 		is($got, $wanted, "$is = $wanted") ;
 	}
+
 
 	return 1 ;
 }

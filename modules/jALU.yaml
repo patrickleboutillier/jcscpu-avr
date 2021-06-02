@@ -10,7 +10,6 @@ source: |
   	// Build the ALU circuit
   	wire *bdec = wire::bus(8) ;
   	jdecoderN dec(3, 8, bops, bdec) ;
-  	// jbuf gnd(wire::zero(), bdec[0]) ;
   
   	wire *bxor = wire::bus(8) ;
   	wire *bor = wire::bus(8) ;
@@ -58,7 +57,18 @@ source: |
   	jenabler enaadd(acs, bdec[7], bcsadd) ;
   
     // Send all the bcs* busses to bcs through 8 7-input jorNs
-    
+    for (int j = 0 ; j < 8 ; j++){
+      wire tmp[7] ;
+      tmp[0] = bcsxor[j] ;
+      tmp[1] = bcsor[j] ;
+      tmp[2] = bcsand[j] ;
+      tmp[3] = bcsnot[j] ;
+      tmp[4] = bcsshr[j] ;
+      tmp[5] = bcsshl[j] ;
+      tmp[6] = bcsadd[j] ;
+      jorN bcoj(7, tmp, bcs[j]) ;
+    }
+
   	jzero z(bcs, wz) ;
   }
 
@@ -70,7 +80,7 @@ test: |
   wire wci("wci"), wco("wco"), weqo("weqo"), walo("walo"), wz("wz") ;
   jALU x(bas, bbs, wci, bops, bcs, wco, weqo, walo, wz) ;
 
-rank: 6
+rank: 7
 
 testperl: |
   use strict ;
