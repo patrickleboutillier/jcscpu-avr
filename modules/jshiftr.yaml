@@ -4,12 +4,12 @@ header: "class jshiftr { public: jshiftr(input bis[8], input wci, output bos[8],
 
 source: |
   jshiftr::jshiftr(input bis[8], input wci, output bos[8], output wco){
-  	jbuf b0(wci, bos[0]) ;
+    jbuf b0(wci, bos[0]) ;
   	
-  	for (int j = 1; j < 8 ; j = j + 1){
-  		jbuf bj(bis[j-1], bos[j]) ;
+    for (int j = 1; j < 8 ; j = j + 1){
+      jbuf bj(bis[j-1], bos[j]) ;
     }
-  	jbuf bn(bis[7], wco) ;
+    jbuf bn(bis[7], wco) ;
   }
 
 test: |
