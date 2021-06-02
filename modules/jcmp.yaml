@@ -1,0 +1,49 @@
+---
+
+header: "class jcmp { public: jcmp(input wa, input wb, input weqi, input wali, output wc, output weqo, output walo) ; } ;"
+
+source: |
+  jcmp::jcmp(input wa, input wb, input weqi, input wali, output wc, output weqo, output walo){
+    wire w23, w45 ;
+    jxor xor1(wa, wb, wc) ;
+    jnot not1(wc, w23) ;
+    jand and1(weqi, w23, weqo) ;
+    jand3 and3(weqi, wa, wc, w45) ;
+    jor or1(wali, w45, walo) ;
+  }
+
+test: |
+  wire wa("wa"), wb("wb"), weqi("weqi"), wali("wali"), wc("wc"), weqo("weqo"), walo("walo") ;
+  jcmp x(wa, wb, weqi, wali, wc, weqo, walo) ;
+
+rank: 5
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jcmp',
+     [qw(wa wb weqi wali)],
+     [qw(wc weqo walo)]) ;
+
+testdata: |
+  0000=000  
+  0100=100  
+  1000=100  
+  1100=000 
+ 
+  0010=010  
+  0110=100  
+  1010=101
+  1110=010  
+
+  0001=001 
+  0101=101  
+  1001=101  
+  1101=001 
+
+  # impossible... 
+  0011=011 
+  0111=101  
+  1011=101  
+  1111=011  

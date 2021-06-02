@@ -54,7 +54,9 @@ sub getval {
 sub settle {
 	my $change = 1 ;
 
+	my $iter = 0 ;
 	while ($change){
+		$iter++ ;
 		$change = 0 ;
 		foreach my $g (@GATES) {
 			if ($g->{type} eq 'NAND'){
@@ -73,8 +75,8 @@ sub settle {
 			}
 		}
 	}
+
+	return $iter ;
 }
-
-
 
 return 1 ;
