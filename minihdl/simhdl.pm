@@ -69,7 +69,7 @@ sub settle {
 					if ((! defined($prev))||($cur != $prev)){
 						$CACHE[$c] = $cur ;
 						$change = 1 ;
-						# warn "$c changed: '$prev' -> '$cur'\n" ;
+						# warn "$c changed: '$prev' -> '$cur' ($g->{a}, $g->{b})\n" ;
 					}
 				}
 			}

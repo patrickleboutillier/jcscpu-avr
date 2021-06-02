@@ -1,0 +1,94 @@
+---
+
+header: |
+  class jALU { public: jALU(input bas[8], input bbs[8], input wci, input bops[3], 
+    output bcs[8], output wco, output weqo, output walo, output wz) ; } ;
+
+source: |
+  jALU::jALU(input bas[8], input bbs[8], input wci, input bops[3], 
+  	output bcs[8], output wco, output weqo, output walo, output wz){
+  	// Build the ALU circuit
+  	wire *bdec = wire::bus(8) ;
+  	jdecoderN dec(3, 8, bops, bdec) ;
+  	// jbuf gnd(wire::zero(), bdec[0]) ;
+  
+  	wire *bxor = wire::bus(8) ;
+  	wire *bor = wire::bus(8) ;
+  	wire *band = wire::bus(8) ;
+  	wire *bnot = wire::bus(8) ;
+  	wire *bshl = wire::bus(8) ;
+  	wire *bshr = wire::bus(8) ;
+  
+    wire *bcsxor = wire::bus(8) ;
+  	jxorer xorer(bas, bbs, bxor, weqo, walo) ;
+  	jenabler enaxor(bxor, bdec[1], bcsxor) ;
+
+    wire *bcsor = wire::bus(8) ;
+  	jorer orer(bas, bbs, bor) ;
+  	jenabler enaor(bor, bdec[2], bcsor) ;
+  
+    wire *bcsand = wire::bus(8) ;
+  	jandder andder(bas, bbs, band) ;
+  	jenabler enaand(band, bdec[3], bcsand) ;
+  
+    wire *bcsnot = wire::bus(8) ;
+  	jnotter n(bas, bnot)  ;
+  	jenabler enanot(bnot, bdec[4], bcsnot) ;  
+  
+    wire *bco = wire::bus(3) ;
+    jorN bcoorn(3, bco, wco) ;
+
+  	wire woshl ;
+    wire *bcsshl = wire::bus(8) ;
+  	jshiftl shitfl(bas, wci, bshl, woshl) ;
+  	jand sle(woshl, bdec[5], bco[0]) ;
+  	jenabler enashl(bshl, bdec[5], bcsshl) ;
+  
+  	wire woshr ;
+    wire *bcsshr = wire::bus(8) ;
+  	jshiftr shiftr(bas, wci, bshr, woshr) ;
+  	jand sre(woshr, bdec[6], bco[1]) ;
+  	jenabler enashr(bshr, bdec[6], bcsshr) ;
+  
+  	wire aco ;
+  	wire acs[8] ;
+    wire *bcsadd = wire::bus(8) ;
+  	jadder adder(bas, bbs, wci, acs, aco) ;
+  	jand adde(aco, bdec[7], bco[2]) ;
+  	jenabler enaadd(acs, bdec[7], bcsadd) ;
+  
+    // Send all the bcs* busses to bcs through 8 7-input jorNs
+    
+  	jzero z(bcs, wz) ;
+  }
+
+test: |
+  wire *bas = wire::bus(8, "bas") ;
+  wire *bbs = wire::bus(8, "bbs") ;
+  wire *bops = wire::bus(3, "bops") ;
+  wire *bcs = wire::bus(8, "bcs") ;
+  wire wci("wci"), wco("wco"), weqo("weqo"), walo("walo"), wz("wz") ;
+  jALU x(bas, bbs, wci, bops, bcs, wco, weqo, walo, wz) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jALU',
+    [bus('bas'), bus('bbs'), qw(wci), bus('bops', 3)],
+    [bus('bcs'), qw(wco weqo walo wz)]) ;
+
+testdata: |
+  # bas, bbs, wci, ops, bcs, wco, weqo, walo, wz 
+  00000000_00000000_0_000=00000000_0101
+  00000001_00000000_0_000=00000001_0010
+  00000001_00000000_0_001=00000000_1011
+  00000001_00000000_0_010=00000010_0010
+  00000001_00000000_0_011=11111110_0010
+  00000001_00000000_0_100=00000000_0011
+  00000001_00000000_0_101=00000001_0010
+  00000001_00000000_0_110=00000001_0010
+  00000001_00000000_0_111=00000000_0011
+  00000101_00001001_0_111=00000000_0001
