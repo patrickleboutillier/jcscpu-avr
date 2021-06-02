@@ -1,0 +1,38 @@
+---
+
+header: "class jadd { public: jadd(input wa, input wb, input wci, output wc, output wco) ; } ;"
+
+source: |
+  jadd::jadd(input wa, input wb, input wci, output wc, output wco){
+    wire wi, wcoa, wcob ;
+    jxor xor1(wa, wb, wi) ;
+    jxor xor2(wi, wci, wc) ;
+    jand and1(wci, wi, wcoa) ;
+    jand and2(wa, wb, wcob) ;
+    jor or1(wcoa, wcob, wco) ;
+  }
+
+test: |
+  wire wa("wa"), wb("wb"), wci("wci"), wc("wc"), wco("wco") ;
+  jadd x(wa, wb, wci, wc, wco) ;
+
+rank: 5
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jadd',
+     [qw(wa wb wci)],
+     [qw(wc wco)]) ;
+
+testdata: |
+  000=00
+  010=10
+  100=10
+  110=01
+
+  001=10
+  011=01
+  101=01
+  111=11
