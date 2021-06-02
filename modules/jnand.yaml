@@ -1,0 +1,29 @@
+---
+
+header: "class jnand { public: jnand(input wa, input wb, output wc) ; } ;"
+
+source: |
+  jnand::jnand(input wa, input wb, output wc){
+  	nand x(wa, wb, wc) ;
+  }
+
+test: |
+  wire a("a"), b("b"), c("c") ;
+  jnand x(a, b, c) ;
+
+rank: 1
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jnand',
+     [qw(a b)],
+     [qw(c)],
+     [<DATA>]) ;
+
+testdata: |
+  00=1
+  01=1
+  10=1
+  11=0

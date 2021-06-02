@@ -10,7 +10,7 @@ class wire {
   public:
     unsigned int id() ;
     wire() ;
-    wire(int io) ;
+    wire(const char *label) ;
   private:
     unsigned int _id ;
 } ;
