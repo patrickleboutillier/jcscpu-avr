@@ -11,6 +11,8 @@ class wire {
     unsigned int id() ;
     wire() ;
     wire(const char *label) ;
+    static wire *bus(int n) ;
+    static wire *bus(int n, const char *label) ;
   private:
     unsigned int _id ;
 } ;

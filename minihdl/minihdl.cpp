@@ -1,5 +1,7 @@
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "minihdl.h"
 
 
@@ -17,6 +19,22 @@ wire::wire(const char *label){
  	_id = wirecnt++ ;
 	printf("WIRE %d %s\n", _id, label) ;
 } ;
+
+
+wire *wire::bus(int n){
+	return new wire[n] ;
+}
+
+wire *wire::bus(int n, const char *label){
+	wire *bus = (wire *)malloc(n * sizeof(wire)) ;
+	for (int i = 0 ; i < n ; i++){
+		int l = strlen(label) + 8 + 1 ;
+		char buf[l] ;
+		sprintf(buf, "%s[%d]", label, i) ;
+		bus[i] = wire(buf) ;
+	}
+	return bus ;
+}
 
 
 unsigned int wire::id(){ 

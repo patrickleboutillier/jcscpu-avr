@@ -1,0 +1,36 @@
+---
+
+header: "class jshiftr { public: jshiftr(input bis[8], input wci, output bos[8], output wco) ; } ;"
+
+source: |
+  jshiftr::jshiftr(input bis[8], input wci, output bos[8], output wco){
+  	jbuf b0(wci, bos[0]) ;
+  	
+  	for (int j = 1; j < 8 ; j = j + 1){
+  		jbuf bj(bis[j-1], bos[j]) ;
+    }
+  	jbuf bn(bis[7], wco) ;
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire *bos = wire::bus(8, "bos") ;
+  wire wci("wci"), wco("wco") ;
+  jshiftr x(bis, wci, bos, wco) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jshiftr',
+    [bus('bis'), qw(wci)],
+    [bus('bos'), qw(wco)]) ;
+
+testdata: |
+  01010101_0=00101010_1
+  01010101_1=10101010_1
+  10101010_0=01010101_0
+  10101010_1=11010101_0
+  00000001_0=00000000_1
