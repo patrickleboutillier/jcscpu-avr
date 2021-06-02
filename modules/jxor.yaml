@@ -16,7 +16,7 @@ test: |
   wire a("a"), b("b"), c("c") ;
   jxor x(a, b, c) ;
 
-rank: 4
+rank: 3
 
 testperl: |
   use strict ;
