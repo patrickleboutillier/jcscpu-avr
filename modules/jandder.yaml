@@ -1,0 +1,32 @@
+---
+
+header: "class jandder { public: jandder(input bas[8], input bbs[8], output bcs[8]) ; } ;"
+
+source: |
+  jandder::jandder(input bas[8], input bbs[8], output bcs[8]){
+    for (int j = 0; j < 8 ; j = j + 1){
+      jand nj(bas[j], bbs[j], bcs[j]) ;
+    }
+  }
+
+test: |
+  wire *bas = wire::bus(8, "bas") ;
+  wire *bbs = wire::bus(8, "bbs") ;
+  wire *bcs = wire::bus(8, "bcs") ;
+  jandder x(bas, bbs, bcs) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jandder',
+    [bus('bas'), bus('bbs')],
+    [bus('bcs')]) ;
+
+testdata: |
+  00000000_00000000=00000000
+  11111111_11111111=11111111
+  10101010_01010101=00000000
+  11111000_00011111=00011000

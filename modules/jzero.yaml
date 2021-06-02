@@ -1,0 +1,29 @@
+---
+
+header: "class jzero { public: jzero(input bis[8], input wz) ; } ;"
+
+source: |
+  jzero::jzero(input bis[8], input wz){
+  	wire wi ;
+  	jorN orn(8, bis, wi) ;
+  	jnot n(wi, wz) ;
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire wz("wz") ;
+  jzero x(bis, wz) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jzero',
+     [bus("bis")],
+     [qw(wz)]) ;
+
+testdata: |
+  00000000=1
+  00000010=0

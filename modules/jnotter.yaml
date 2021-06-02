@@ -1,0 +1,30 @@
+---
+
+header: "class jnotter { public: jnotter (input bis[8], output bos[8]) ; } ;"
+
+source: |
+  jnotter::jnotter (input bis[8], output bos[8]){
+  	for (int j = 0; j < 8 ; j = j + 1){
+  		jnot nj(bis[j], bos[j]) ;
+  	}
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire *bos = wire::bus(8, "bos") ;
+  jnotter x(bis, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jnotter',
+    [bus('bis')],
+    [bus('bos')]) ;
+
+testdata: |
+  00000000=11111111
+  11111111=00000000
+  10101010=01010101

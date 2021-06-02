@@ -6,7 +6,7 @@ use Data::Dumper ;
 
 
 my @GATES = () ;
-my @CACHE = () ;
+my @CACHE = (0, 1) ;
 my %WIRES = () ;
 
 

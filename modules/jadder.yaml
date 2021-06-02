@@ -1,0 +1,38 @@
+---
+
+header: "class jadder { public: jadder(input bas[8], input bbs[8], input wci, output bcs[8], output wco) ; } ;"
+
+source: |
+  jadder::jadder(input bas[8], input bbs[8], input wci, output bcs[8], output wco){
+    wire tc[7] ;
+
+    jadd add0(bas[7], bbs[7], wci, bcs[7], tc[0]) ;
+    for (int j = 1; j < 7; j = j + 1){
+      jadd addj(bas[7-j], bbs[7-j], tc[j-1], bcs[7-j], tc[j]) ;
+    }
+    jadd addn(bas[0], bbs[0], tc[6], bcs[0], wco) ;
+  }
+
+test: |
+  wire *bas = wire::bus(8, "bas") ;
+  wire *bbs = wire::bus(8, "bbs") ;
+  wire *bcs = wire::bus(8, "bcs") ;
+  wire wci("wci"), wco("wco") ;
+  jadder x(bas, bbs, wci, bcs, wco) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jadder',
+    [bus('bas'), bus('bbs'), qw(wci)],
+    [bus('bcs'), qw(wco)]) ;
+
+testdata: |
+  00000000_00000000_0=00000000_0
+  11111111_11111111_0=11111110_1
+  11111111_00000000_0=11111111_0
+  11111111_00000000_1=00000000_1
+  00010100_00010110_0=00101010_0

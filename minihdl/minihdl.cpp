@@ -11,7 +11,11 @@ unsigned int gatecnt = 0 ;
 
 wire::wire(){ 
  	_id = wirecnt++ ;
-	// printf("WIRE %d\n", _id) ;
+} ;
+
+
+wire::wire(unsigned int id){ 
+ 	_id = id ;
 } ;
 
 
@@ -19,6 +23,18 @@ wire::wire(const char *label){
  	_id = wirecnt++ ;
 	printf("WIRE %d %s\n", _id, label) ;
 } ;
+
+
+wire wire::one(){
+	wire one(1) ;
+	return one ;
+}
+
+
+wire wire::zero(){
+	wire zero((unsigned int)0) ;
+	return zero ;
+}
 
 
 wire *wire::bus(int n){

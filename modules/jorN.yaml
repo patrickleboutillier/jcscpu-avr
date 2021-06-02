@@ -1,0 +1,34 @@
+---
+
+header: "class jorN { public: jorN(int n, input bis[8], input wo) ; } ;"
+
+source: |
+  jorN::jorN(int n, input bis[8], input wo){
+  	wire os[n-2] ;
+  	
+  	jor or0(bis[0], bis[1], os[0]) ;
+    for (int j = 0; j < (n-2); j = j + 1){
+      jor orj(os[j], bis[j+2], (j == (n-3) ? wo : os[j+1])) ;
+    }
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire wo("wo") ;
+  jorN x(8, bis, wo) ;
+
+rank: 4
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jorN',
+     [bus("bis")],
+     [qw(wo)]) ;
+
+testdata: |
+  00000000=0
+  00000001=1
+  01000000=1
+  11111111=1

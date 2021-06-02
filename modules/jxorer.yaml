@@ -1,0 +1,38 @@
+---
+
+header: "class jxorer { public: jxorer(input bas[8], input bbs[8], output bcs[8], output weqo, output walo) ; } ;"
+
+source: |
+  jxorer::jxorer(input bas[8], input bbs[8], output bcs[8], output weqo, output walo){
+    wire teqo[7], talo[7] ;
+
+    jcmp cmp0(bas[0], bbs[0], wire::one(), wire::zero(), bcs[0], teqo[0], talo[0]) ;
+    for (int j = 1; j < 7 ; j = j + 1){
+      jcmp cmpj(bas[j], bbs[j], teqo[j-1], talo[j-1], bcs[j], teqo[j], talo[j]) ;
+    }
+    jcmp cmpn(bas[7], bbs[7], teqo[6], talo[6], bcs[7], weqo, walo) ;
+  }
+
+
+test: |
+  wire *bas = wire::bus(8, "bas") ;
+  wire *bbs = wire::bus(8, "bbs") ;
+  wire *bcs = wire::bus(8, "bcs") ;
+  wire weqo("weqo"), walo("walo") ;
+  jxorer x(bas, bbs, bcs, weqo, walo) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jxorer',
+    [bus('bas'), bus('bbs')],
+    [bus('bcs'), qw(weqo walo)]) ;
+
+testdata: |
+  00000000_00000000=00000000_10
+  11111111_11111111=00000000_10
+  11111111_00000000=11111111_01
+  01000001_10101011=11101010_00

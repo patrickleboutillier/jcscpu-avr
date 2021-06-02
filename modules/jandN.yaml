@@ -1,0 +1,34 @@
+---
+
+header: "class jandN { public: jandN(int n, input bis[8], input wo) ; } ;"
+
+source: |
+  jandN::jandN(int n, input bis[8], input wo){
+  	wire os[n-2] ;
+  	
+  	jand and0(bis[0], bis[1], os[0]) ;
+    for (int j = 0; j < (n-2); j = j + 1){
+      jand andj(os[j], bis[j+2], (j == (n-3) ? wo : os[j+1])) ;
+    }
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire wo("wo") ;
+  jandN x(8, bis, wo) ;
+
+rank: 4
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jandN',
+     [bus("bis")],
+     [qw(wo)]) ;
+
+testdata: |
+  00000000=0
+  00000001=0
+  01000000=0
+  11111111=1
