@@ -20,7 +20,7 @@ for f in *.yaml ; do
 	yq e .source $f >> modules.cpp
 	rank=$(printf "%02d" "$(yq e .rank $f)")
 	yq e .testperl $f > ../t/${rank}_$name.t
-	yq e .testdata $f > ../t/${rank}_$name.tdata
+	yq e .testdata $f > ../t/$name.tdata
 
 	echo -e "#include \"minihdl.h\"\n#include \"modules.h\"\n\nint main(){\n" > $name.cpp
 	yq e .test $f >> $name.cpp

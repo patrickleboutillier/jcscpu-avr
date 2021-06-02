@@ -1,0 +1,30 @@
+---
+
+header: "class jand { public: jand(input wa, input wb, output wc) ; } ;"
+
+source: |
+  jand::jand(input wa, input wb, output wc){
+    wire w ;
+    jnand x(wa, wb, w) ;
+    jnot y(w, wc) ;
+  }
+
+test: |
+  wire a("a"), b("b"), c("c") ;
+  jand x(a, b, c) ;
+
+rank: 3
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jand',
+     [qw(a b)],
+     [qw(c)]) ;
+
+testdata: |
+  00=0
+  01=0
+  10=0
+  11=1

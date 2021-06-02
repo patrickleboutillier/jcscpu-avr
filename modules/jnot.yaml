@@ -1,0 +1,26 @@
+---
+
+header: "class jnot { public: jnot(input wa, input wb) ; } ;"
+
+source: |
+  jnot::jnot(input wa, input wb){
+  	jnand x(wa, wa, wb) ;
+  }
+
+test: |
+  wire a("a"), b("b") ;
+  jnot x(a, b) ;
+
+rank: 2
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jnot',
+     [qw(a)],
+     [qw(b)]) ;
+
+testdata: |
+  0=1
+  1=0

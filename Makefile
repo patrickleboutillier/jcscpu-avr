@@ -1,5 +1,4 @@
-.PHONY: modules
-modules: minihdl
+modules: hdl modules/*.yaml
 	cd modules && ./gen.sh
 	g++ -c -Iminihdl -Imodules modules/modules.cpp -o modules/modules.o
 	for f in modules/*.yaml ; do name=$$(basename $$f .yaml) ; g++ -c -Iminihdl -Imodules modules/$$name.cpp -o modules/$$name.o || exit 1; done
@@ -7,16 +6,12 @@ modules: minihdl
 	for f in modules/*.yaml ; do name=$$(basename $$f .yaml) ; modules/$$name.test > sim/$$name.sim || exit 1; done
 
 
-.PHONY: minihdl
-minihdl: minihdl/minihdl.cpp minihdl/minihdl.h
+hdl: minihdl/minihdl.cpp minihdl/minihdl.h
 	g++ -c -Iminihdl minihdl/minihdl.cpp -o minihdl/minihdl.o
 
 clean:
 	rm -f minihdl/minihdl.o modules/*.cpp modules/*.h modules/*.o modules/*.test sim/*.sim t/*.t
 
 
-
-
-test: build
-	g++ -c -I. test.cpp -o test.o
-	g++ -o minihdl *.o
+test: modules
+	prove -Iminihdl -It

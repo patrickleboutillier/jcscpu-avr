@@ -19,8 +19,7 @@ testperl: |
 
   test('jnand',
      [qw(a b)],
-     [qw(c)],
-     [<DATA>]) ;
+     [qw(c)]) ;
 
 testdata: |
   00=1
