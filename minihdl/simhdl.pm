@@ -6,7 +6,8 @@ use Data::Dumper ;
 
 
 my @GATES = () ;
-my @CACHE = (0, 1) ;
+# Special wires: 0 is ground, 1 is VCC, 2 is power-on-reset
+my @CACHE = (0, 1, 1) ;
 my %WIRES = () ;
 
 
@@ -60,8 +61,8 @@ sub settle {
 		$change = 0 ;
 		foreach my $g (@GATES) {
 			if ($g->{type} eq 'NAND'){
-				my $va = $CACHE[$g->{a}] ;
-				my $vb = $CACHE[$g->{b}] ;
+				my $va = $CACHE[$g->{a}] || 0 ;
+				my $vb = $CACHE[$g->{b}] || 0 ;
 				my $c = $g->{c} ;
 				if (defined($va) && defined($vb)){
 					my $prev = $CACHE[$c] ;

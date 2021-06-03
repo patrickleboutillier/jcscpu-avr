@@ -1,0 +1,38 @@
+---
+
+header: "class jmemory { public: jmemory(input wi, input ws, output wo) ; } ;"
+
+source: |
+  jmemory::jmemory(input wi, input ws, output wo){
+  	wire wa, wb, wc ;
+   	jnand nand1(wi, ws, wa) ;
+  	jnand nand2(wa, ws, wb) ;
+  	jnand nand3(wa, wc, wo) ;
+  	jnand nand4(wo, wb, wc) ;
+  }
+
+test: |
+  wire wi("wi"), ws("ws"), wo("wo"), wsr("wsr") ;
+  jor wsro(ws, wire::reset(), wsr) ;
+  jmemory x(wi, wsr, wo) ;
+
+rank: 5
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jmemory',
+     [qw(wi ws)],
+     [qw(wo)]) ;
+
+testdata: |
+  # Output is undefined until 's' has been set once! 
+  00=0
+  01=0
+  11=1
+  10=1
+  00=1
+  01=0
+  00=0
+  10=0

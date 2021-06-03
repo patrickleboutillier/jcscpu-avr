@@ -26,6 +26,11 @@ sub test {
 
 	simhdl("sim/$sim.sim") ;
 
+	# Handle power-on-reset
+	settle() ;
+	setval('reset', 0) ;
+	settle() ;
+
 	foreach my $case (@cases){
 		my ($is, $os) = split(/=/, $case) ;
 		my @is = split(//, $is) ;

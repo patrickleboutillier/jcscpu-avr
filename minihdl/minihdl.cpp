@@ -19,21 +19,28 @@ wire::wire(unsigned int id){
 } ;
 
 
-wire::wire(const char *label){ 
- 	_id = wirecnt++ ;
+wire::wire(const char *label) : wire(){ 
+	printf("WIRE %d %s\n", _id, label) ;
+} ;
+
+
+wire::wire(unsigned int id, const char *label) : wire(id){ 
 	printf("WIRE %d %s\n", _id, label) ;
 } ;
 
 
 wire wire::one(){
-	wire one(1) ;
-	return one ;
+	return wire(1) ;
 }
 
 
 wire wire::zero(){
-	wire zero((unsigned int)0) ;
-	return zero ;
+	return wire((unsigned int)0) ;
+}
+
+
+wire wire::reset(){
+	return wire(2, "reset") ;
 }
 
 
@@ -65,6 +72,7 @@ nand::nand(wire a, wire b, wire c){
 
 
 void init(){
+	wire::reset() ;
 }
 
 

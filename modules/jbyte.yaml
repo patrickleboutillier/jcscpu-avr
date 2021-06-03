@@ -1,0 +1,40 @@
+---
+
+header: "class jbyte { public: jbyte(input bis[8], input ws, output bos[8]) ; } ;"
+
+source: |
+  jbyte::jbyte(input bis[8], input ws, output bos[8]){
+  	for (int j = 0; j < 8 ; j = j + 1){
+  		jmemory mem(bis[j], ws, bos[j]) ;
+    }
+  }
+
+test: |
+  wire *bis = wire::bus(8, "bis") ;
+  wire *bos = wire::bus(8, "bos") ;
+  wire ws("ws"), wsr("wsr") ;
+  jor wsro(ws, wire::reset(), wsr) ;
+  jbyte x(bis, wsr, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jbyte',
+     [bus("bis"), qw(ws)],
+     [bus("bos")]) ;
+
+testdata: |
+  # Output is undefined until 's' has been set once! */
+  00000000_0=00000000
+  00000000_1=00000000
+  10000000_1=10000000
+  10001000_1=10001000
+  10001000_0=10001000
+  00001000_0=10001000
+  00001000_1=00001000
+  00001000_0=00001000
+  00001111_0=00001000
+  00001111_1=00001111

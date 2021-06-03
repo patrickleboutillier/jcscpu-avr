@@ -1,0 +1,48 @@
+---
+
+header: "class jRAM { public: jRAM(input bas[8], input wsa, input bis[8], input ws, input we, output bos[8]) ; } ;"
+
+source: |
+  jRAM::jRAM(input bas[8], input wsa, input bis[8], input ws, input we, output bos[8]){
+  	wire busd[8] ;	
+  	jregister MAR(bas, wsa, wire::one(), busd) ;
+  
+  	wire wxs[16], wys[16] ;
+  	jdecoderN decx(4, 16, busd, wxs) ;
+  	jdecoderN decy(4, 16, busd + 4, wys) ;
+  
+  	for (int x = 0 ; x < 16 ; x = x + 1){
+  		for (int y = 0 ; y < 16 ; y = y + 1){
+  			wire wxo, wso, weo ;
+  			jand and1(wxs[x], wys[y], wxo) ;
+  			jand and2(wxo, ws, wso) ;
+  			jand and3(wxo, we, weo) ;
+  
+  			jregister regxy(bis, wso, weo, bos) ;
+  		}
+  	}
+  }
+
+test: |
+  wire *bas = wire::bus(8, "bas") ;
+  wire *bis = wire::bus(8, "bis") ;
+  wire *bos = wire::bus(8, "bos") ;
+  wire wsa("wsa"), ws("ws"), we("we") ;
+  jRAM x(bas, wsa, bis, ws, we, bos) ;
+
+rank: 7
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jRAM',
+     [bus("bas"), qw(wsa), bus("bis"), qw(ws we)],
+     [bus("bos")]) ;
+
+testdata: |
+  # bas, wsa, bis, ws, we, bos
+  00000000_0_00000000_0_0=00000000
+  00000000_1_00000000_0_0=00000000
+  00000000_0_00000010_1_0=00000000
+  00000000_0_00000000_0_1=00000010

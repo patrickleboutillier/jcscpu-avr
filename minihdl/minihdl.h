@@ -15,8 +15,10 @@ class wire {
     static wire *bus(int n, const char *label) ;
     static wire one() ;
     static wire zero() ;
+    static wire reset() ;
   private:
     wire(unsigned int id) ;
+    wire(unsigned int id, const char *label) ;
     unsigned int _id ;
 } ;
 
