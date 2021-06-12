@@ -1,16 +1,18 @@
 ---
 
-header: "class jRAM { public: jRAM(input bas[8], input wsa, input bis[8], input ws, input we, output bos[8]) ; } ;"
+header: |
+  struct jRAM { jRAM(input wire bas[8], input wire wsa, input wire bis[8], input wire ws, input wire we, output wire bos[8]) ; } ;
 
 source: |
-  jRAM::jRAM(input bas[8], input wsa, input bis[8], input ws, input we, output bos[8]){
+  jRAM::jRAM(input wire bas[8], input wire wsa, input wire bis[8], input wire ws, input wire we, output wire bos[8]){
   	wire busd[8] ;	
-  	jregister MAR(bas, wsa, wire::one(), busd) ;
+  	jregister MAR(bas, wsa, wire::vcc, busd) ;
   
   	wire wxs[16], wys[16] ;
   	jdecoderN decx(4, 16, busd, wxs) ;
   	jdecoderN decy(4, 16, busd + 4, wys) ;
   
+    busor bosor(8, bos) ;
   	for (int x = 0 ; x < 16 ; x = x + 1){
   		for (int y = 0 ; y < 16 ; y = y + 1){
   			wire wxo, wso, weo ;
@@ -18,19 +20,19 @@ source: |
   			jand and2(wxo, ws, wso) ;
   			jand and3(wxo, we, weo) ;
   
-  			jregister regxy(bis, wso, weo, bos) ;
+  			jregister regxy(bis, wso, weo, bosor.new_input()) ;
   		}
   	}
   }
 
 test: |
-  wire *bas = wire::bus(8, "bas") ;
-  wire *bis = wire::bus(8, "bis") ;
-  wire *bos = wire::bus(8, "bos") ;
+  wire *bas = bus(8, "bas").wires() ;
+  wire *bis = bus(8, "bis").wires() ;
+  wire *bos = bus(8, "bos").wires() ;
   wire wsa("wsa"), ws("ws"), we("we") ;
   jRAM x(bas, wsa, bis, ws, we, bos) ;
 
-rank: 7
+rank: 8
 
 testperl: |
   use strict ;

@@ -1,0 +1,283 @@
+---
+
+header: |
+  struct jCU { jCU(input wire CLK_clk, input wire CLK_clkd, input wire CLK_clke, input wire CLK_clks, 
+  	input wire STP_bus[6],
+  	input wire flags_bus[4], 
+  	input wire ir_bus[8],
+  	output wire alu_op[3],
+  	output wire alu_ena_ci, output wire flags_s, output wire tmp_s, output wire bus1_bit1, 
+  	output wire acc_s, output wire acc_e,
+  	output wire r0_s, output wire r0_e, output wire r1_s, output wire r1_e, 
+  	output wire r2_s, output wire r2_e, output wire r3_s, output wire r3_e, 
+    output wire ram_mar_s, output wire ram_s, output wire ram_e,
+  	output wire iar_s, output wire iar_e, output wire ir_s,
+  	output wire halt,
+  	output wire io_s, output wire io_e, output wire io_io, output wire io_da
+  ) ; } ;
+
+source: |
+  jCU::jCU(input wire CLK_clk, input wire CLK_clkd, input wire CLK_clke, input wire CLK_clks, 
+  	input wire STP_bus[6],
+  	input wire flags_bus[4], 
+  	input wire ir_bus[8],
+  	output wire alu_op[3],
+  	output wire alu_ena_ci, output wire flags_s, output wire tmp_s, output wire bus1_bit1, 
+  	output wire acc_s, output wire acc_e,
+  	output wire r0_s, output wire r0_e, output wire r1_s, output wire r1_e, 
+  	output wire r2_s, output wire r2_e, output wire r3_s, output wire r3_e, 
+    output wire ram_mar_s, output wire ram_s, output wire ram_e,
+  	output wire iar_s, output wire iar_e, output wire ir_s,
+  	output wire halt,
+  	output wire io_s, output wire io_e, output wire io_io, output wire io_da){
+  	
+    wire inst_bus[8] ;
+  
+  	// ALL ENABLES	
+  	wor iar_ena_wor, ram_ena_wor, acc_ena_wor, bus1_bit1_wor ;
+  	jand iar_ena(CLK_clke, iar_ena_wor, iar_e) ;
+  	jand ram_ena(CLK_clke, ram_ena_wor, ram_e) ;
+  	jand acc_ena(CLK_clke, acc_ena_wor, acc_e) ;  
+    jbuf(bus1_bit1_wor, bus1_bit1) ;
+  		
+  	// ALL SETS
+  	wor ir_set_wor, ram_mar_set_wor, iar_set_wor, acc_set_wor, ram_set_wor, tmp_set_wor, flags_set_wor ;
+  	jand ir_set(CLK_clks, ir_set_wor, ir_s) ;
+  	jand ram_mar_set(CLK_clks, ram_mar_set_wor, ram_mar_s) ;
+  	jand iar_set(CLK_clks, iar_set_wor, iar_s) ;
+  	jand acc_set(CLK_clks, acc_set_wor, acc_s) ;
+  	jand ram_set(CLK_clks, ram_set_wor, ram_s) ;
+  	jand tmp_set(CLK_clks, tmp_set_wor, tmp_s) ;
+  	jand flags_set(CLK_clks, flags_set_wor, flags_s) ;
+  
+  	// Hook up the circuit used to process the first 3 steps of each cycle (see page 108 in book), i.e
+  	// - Load IAR to MAR and increment IAR in AC
+  	// - Load the instruction from RAM into IR
+  	// - Increment the IAR from ACC
+  	bus1_bit1_wor.assign(STP_bus[0]) ;
+  	iar_ena_wor.assign(STP_bus[0]) ;
+  	ram_mar_set_wor.assign(STP_bus[0]) ;
+  	acc_set_wor.assign(STP_bus[0]) ;
+  
+  	ram_ena_wor.assign(STP_bus[1]) ;
+  	ir_set_wor.assign(STP_bus[1]) ;
+  
+  	acc_ena_wor.assign(STP_bus[2]) ;
+  	iar_set_wor.assign(STP_bus[2]) ;
+  
+  
+  	// Then, we set up the parts that are required to actually implement instructions, i.e.
+  	// - Connect the decoders for the enable and set operations on R0-R3
+  	wire rega_e, regb_e, regb_s ;
+  	wor rega_ena_wor, regb_ena_wor, regb_set_wor ;
+  	jbuf(rega_ena_wor, rega_e) ;
+  	jbuf(regb_ena_wor, regb_e) ;
+  	jbuf(regb_set_wor, regb_s) ;
+   		
+  	// s side
+  	wire sdeco[4] ;
+  	jand3 r0_regb_set(CLK_clks, regb_s, sdeco[3], r0_s) ;
+  	jand3 r1_regb_set(CLK_clks, regb_s, sdeco[2], r1_s) ;
+  	jand3 r2_regb_set(CLK_clks, regb_s, sdeco[1], r2_s) ;
+  	jand3 r3_regb_set(CLK_clks, regb_s, sdeco[0], r3_s) ;
+  	wire tmpbsd[] = {ir_bus[6], ir_bus[7]} ;
+  	jdecoderN regb_set_dec(2, 4, tmpbsd, sdeco) ;
+  
+  	// e side
+  	wire edecoa[4], edecob[4] ;
+  	wire r0_wora, r0_worb ;
+  	jor r0_wor(r0_wora, r0_worb, r0_e) ;
+  	jand3 r0_rega_ena(CLK_clke, rega_e, edecoa[3], r0_wora) ;
+  	jand3 r0_regb_ena(CLK_clke, regb_e, edecob[3], r0_worb) ;
+  	wire r1_wora, r1_worb ;
+  	jor r1_wor(r1_wora, r1_worb, r1_e) ;
+  	jand3 r1_rega_ena(CLK_clke, rega_e, edecoa[2], r1_wora) ;
+  	jand3 r1_regb_ena(CLK_clke, regb_e, edecob[2], r1_worb) ;
+  	wire r2_wora, r2_worb ;
+  	jor r2_wor(r2_wora, r2_worb, r2_e) ;
+  	jand3 r2_rega_ena(CLK_clke, rega_e, edecoa[1], r2_wora) ;
+  	jand3 r2_regb_ena(CLK_clke, regb_e, edecob[1], r2_worb) ;
+  	wire r3_wora, r3_worb ;
+  	jor r3_wor(r3_wora, r3_worb, r3_e) ;
+  	jand3 r3_rega_ena(CLK_clke, rega_e, edecoa[0], r3_wora) ;
+  	jand3 r3_regb_ena(CLK_clke, regb_e, edecob[0], r3_worb) ;
+  
+  	wire tmpaed[2] = {ir_bus[4], ir_bus[5]} ;
+  	jdecoderN rega_ena_dec(2, 4, tmpaed, edecoa) ;
+  	wire tmpbed[2] = {ir_bus[6], ir_bus[7]} ;
+  	jdecoderN regb_ena_dec(2, 4, tmpbed, edecob) ;
+  		
+  	// Finally, install the instruction decoder
+  	wire notalu ;
+  	jnot nalu(ir_bus[0], notalu) ;
+  	wire idecbus[8] ;
+  	wire tmpid[] = {ir_bus[1], ir_bus[2], ir_bus[3]} ;
+  	jdecoderN inst_dec(3, 8, tmpid, idecbus) ;
+  	for (int j = 0 ; j < 8 ; j = j + 1){
+  		jand iandj(notalu, idecbus[7-j], inst_bus[j]) ;
+  	}
+      
+    // Now, setting up instruction circuits involves:
+  	// - Hook up to the proper wire of INST.bus
+  	// - Wire up the logical circuit and attach it to proper step wires
+  	// - Use the "elastic" OR gates (xxx.eor) to enable and set
+  
+  	// ALU INSTRUCTIONS
+  	wire aa1 ;
+  	jand alu1(STP_bus[3], ir_bus[0], aa1) ;
+  	regb_ena_wor.assign(aa1) ;
+  	tmp_set_wor.assign(aa1) ;
+  
+  	wire aa2 ;
+  	jand alu2(STP_bus[4], ir_bus[0], aa2) ;
+  	rega_ena_wor.assign(aa2) ;
+  	jbuf(aa2, alu_ena_ci) ;
+  	acc_set_wor.assign(aa2) ;
+  	flags_set_wor.assign(aa2) ;
+  
+  	wire wnotcmp, aa3 ;
+  	jand3 alu3(STP_bus[5], ir_bus[0], wnotcmp, aa3) ;
+  	acc_ena_wor.assign(aa3) ;
+  	regb_set_wor.assign(aa3) ;
+  
+  	// Operation selector
+  	wire walu ;
+  	jnot walunot(walu, wnotcmp) ;
+  	wire cmpbus[3] = {ir_bus[1], ir_bus[2], ir_bus[3]} ;
+  	jandN ncmpbus(3, cmpbus, walu) ;
+  	jand3 aluopand1(STP_bus[4], ir_bus[0], cmpbus[0], alu_op[0]) ;
+  	jand3 aluopand2(STP_bus[4], ir_bus[0], cmpbus[1], alu_op[1]) ;
+  	jand3 aluopand3(STP_bus[4], ir_bus[0], cmpbus[2], alu_op[2]) ; 
+  
+  
+   	// LOAD AND STORE INSTRUCTIONS
+  	wire l1 ;
+  	jand l1and(STP_bus[3], inst_bus[0], l1) ;
+  	rega_ena_wor.assign(l1) ;
+  	ram_mar_set_wor.assign(l1) ;
+  
+  	wire l2 ;
+  	jand l2and(STP_bus[4], inst_bus[0], l2) ;
+  	ram_ena_wor.assign(l2) ;
+  	regb_set_wor.assign(l2) ;
+  
+  	wire s1 ;
+  	jand s1and(STP_bus[3], inst_bus[1], s1) ;
+  	rega_ena_wor.assign(s1) ;
+  	ram_mar_set_wor.assign(s1) ;
+  
+  	wire s2 ;
+  	jand s2and(STP_bus[4], inst_bus[1], s2) ;
+  	regb_ena_wor.assign(s2) ;
+  	ram_set_wor.assign(s2) ;  
+  
+  
+    // DATA INSTRUCTIONS
+  	wire d1 ;
+  	jand d1and(STP_bus[3], inst_bus[2], d1) ;
+  	bus1_bit1_wor.assign(d1) ;
+  	iar_ena_wor.assign(d1) ;
+  	ram_mar_set_wor.assign(d1) ;
+  	acc_set_wor.assign(d1) ;
+  
+  	wire d2 ;
+  	jand d2and(STP_bus[4], inst_bus[2], d2) ;
+  	ram_ena_wor.assign(d2) ;
+  	regb_set_wor.assign(d2) ;
+  
+  	wire d3 ;
+  	jand d3and(STP_bus[5], inst_bus[2], d3) ;
+  	acc_ena_wor.assign(d3) ;
+  	iar_set_wor.assign(d3) ;  
+  
+  
+    // CLF INSTRUCTIONS
+  	wire clbreg[4] = { ir_bus[4], ir_bus[5], ir_bus[6], ir_bus[7] } ;
+  	wire clbinst[16] ;
+  	jdecoderN clfdec(4, 16, clbreg, clbinst) ;
+  
+  	// CLF, 01100000
+  	wire cl1 ;
+  	jand3 cland1(inst_bus[6], STP_bus[3], clbinst[15], cl1) ;
+  	bus1_bit1_wor.assign(cl1) ;
+  	flags_set_wor.assign(cl1) ;
+  
+  	// HALT, 01100001
+  	jand3 hltand1(inst_bus[6], STP_bus[5], clbinst[14], halt) ;
+
+         
+  	// IO INSTRUCTIONS
+  	wire io1 ;
+  	jand3 ioand1(STP_bus[3], inst_bus[7], ir_bus[4], io1) ;
+  	regb_ena_wor.assign(io1) ;
+  
+  	wire ion4, io2 ;
+  	jnot ionot1(ir_bus[4], ion4) ;
+  	jand3 ioand2(STP_bus[4], inst_bus[7], ion4, io2) ;
+  	regb_set_wor.assign(io2) ;
+  
+  	jand ios(CLK_clks, io1, io_s) ;
+  	jand ioe(CLK_clke, io2, io_e) ;
+  	jbuf(ir_bus[4], io_io) ;
+  	jbuf(ir_bus[5], io_da) ;
+
+
+  	// JUMP INSTRUCTIONS
+  	// JUMPR
+  	wire jr1 ;
+  	jand jrand(STP_bus[3], inst_bus[3], jr1) ;
+  	regb_ena_wor.assign(jr1) ;
+  	iar_set_wor.assign(jr1) ;
+  
+  	// JUMP
+  	wire j1 ;
+  	jand jand1(STP_bus[3], inst_bus[4], j1) ;
+  	iar_ena_wor.assign(j1) ;
+  	ram_mar_set_wor.assign(j1) ;
+  
+  	wire j2 ;
+  	jand jand2(STP_bus[4], inst_bus[4], j2) ;
+  	ram_ena_wor.assign(j2) ;
+  	iar_set_wor.assign(j2) ;
+  
+  	// JUMPIF
+  	wire ji1 ;
+  	jand jiand1(STP_bus[3], inst_bus[5], ji1) ;
+  	bus1_bit1_wor.assign(ji1) ;
+  	iar_ena_wor.assign(ji1) ;
+  	ram_mar_set_wor.assign(ji1) ;
+  	acc_set_wor.assign(ji1) ;
+  
+  	wire ji2 ;
+  	jand jiand2(STP_bus[4], inst_bus[5], ji2) ;
+  	acc_ena_wor.assign(ji2) ;
+  	iar_set_wor.assign(ji2) ;
+  
+  	wire ji3, jflago ;
+  	jand3 jiand3(STP_bus[5], inst_bus[5], jflago, ji3) ;
+  	ram_ena_wor.assign(ji3) ;
+  	iar_set_wor.assign(ji3) ;
+  
+  	wire jfbus[4] ;
+  	jand jfand1(flags_bus[0], ir_bus[4], jfbus[0]) ;
+  	jand jfand2(flags_bus[1], ir_bus[5], jfbus[1]) ;
+  	jand jfand3(flags_bus[2], ir_bus[6], jfbus[2]) ;
+  	jand jfand4(flags_bus[3], ir_bus[7], jfbus[3]) ;
+  	jorN jfor1(4, jfbus, jflago) ;         
+  }
+
+test:
+  wire null("null") ;
+rank: 8
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jCU',
+    [qw(null)],
+    [qw(null)]) ;
+  
+
+testdata: |
+  0=0

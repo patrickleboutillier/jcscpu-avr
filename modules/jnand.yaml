@@ -1,9 +1,10 @@
 ---
 
-header: "class jnand { public: jnand(input wa, input wb, output wc) ; } ;"
+header: |
+  struct jnand { jnand(input wire wa, input wire wb, output wire wc) ; } ;
 
 source: |
-  jnand::jnand(input wa, input wb, output wc){
+  jnand::jnand(input wire wa, input wire wb, output wire wc){
   	nand x(wa, wb, wc) ;
   }
 

@@ -1,17 +1,18 @@
 ---
 
-header: "class jnotter { public: jnotter (input bis[8], output bos[8]) ; } ;"
+header: |
+  struct jnotter { jnotter (input wire bis[8], output wire bos[8]) ; } ;
 
 source: |
-  jnotter::jnotter (input bis[8], output bos[8]){
+  jnotter::jnotter (input wire bis[8], output wire bos[8]){
   	for (int j = 0; j < 8 ; j = j + 1){
   		jnot nj(bis[j], bos[j]) ;
   	}
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
-  wire *bos = wire::bus(8, "bos") ;
+  wire *bis = bus(8, "bis").wires() ;
+  wire *bos = bus(8, "bos").wires() ;
   jnotter x(bis, bos) ;
 
 rank: 6

@@ -1,0 +1,26 @@
+---
+
+header: 
+source: 
+
+test: |
+  wor x("o") ;
+  wire a("a"), b("b"), c("c") ;
+  x.assign(a) ;
+  x.assign(b) ;
+  x.assign(c) ;
+
+rank: 1
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('wor',
+    [qw(a b c)],
+    [qw(o)]) ;
+
+testdata: |
+  000=0
+  100=1
+  001=1

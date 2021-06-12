@@ -1,9 +1,10 @@
 ---
 
-header: "class jadder { public: jadder(input bas[8], input bbs[8], input wci, output bcs[8], output wco) ; } ;"
+header: |
+  struct jadder { jadder(input wire bas[8], input wire bbs[8], input wire wci, output wire bcs[8], output wire wco) ; } ;
 
 source: |
-  jadder::jadder(input bas[8], input bbs[8], input wci, output bcs[8], output wco){
+  jadder::jadder(input wire bas[8], input wire bbs[8], input wire wci, output wire bcs[8], output wire wco){
     wire tc[7] ;
 
     jadd add0(bas[7], bbs[7], wci, bcs[7], tc[0]) ;
@@ -14,9 +15,9 @@ source: |
   }
 
 test: |
-  wire *bas = wire::bus(8, "bas") ;
-  wire *bbs = wire::bus(8, "bbs") ;
-  wire *bcs = wire::bus(8, "bcs") ;
+  wire *bas = bus(8, "bas").wires() ;
+  wire *bbs = bus(8, "bbs").wires() ;
+  wire *bcs = bus(8, "bcs").wires() ;
   wire wci("wci"), wco("wco") ;
   jadder x(bas, bbs, wci, bcs, wco) ;
 

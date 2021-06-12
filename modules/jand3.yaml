@@ -1,17 +1,18 @@
 ---
 
-header: "class jand3 { public: jand3(input wa, input wb, input wc, output wd) ; } ;"
+header: |
+  struct jand3 { jand3(input wire wa, input wire wb, input wire wc, output wire wo) ; } ;
 
 source: |
-  jand3::jand3(input wa, input wb, input wc, output wd){
-    wire os ;
-    jand and0(wa, wb, os) ;
-    jand and1(wc, os, wd) ;
+  jand3::jand3(input wire wa, input wire wb, input wire wc, output wire wo){
+    wire tmp[] = {wa, wb, wc} ;
+  	jandN x(3, tmp, wo) ;
   }
 
 test: |
-  wire a("a"), b("b"), c("c"), d("d") ;
-  jand3 x(a, b, c, d) ;
+  wire wa("wa"), wb("wb"), wc("wc") ;
+  wire wo("wo") ;
+  jand3 x(wa, wb, wc, wo) ;
 
 rank: 4
 
@@ -20,15 +21,11 @@ testperl: |
   require test ;
 
   test('jand3',
-     [qw(a b c)],
-     [qw(d)]) ;
+     [qw(wa wb wc)],
+     [qw(wo)]) ;
 
 testdata: |
   000=0
   001=0
-  010=0
-  011=0
   100=0
-  101=0
-  110=0
   111=1

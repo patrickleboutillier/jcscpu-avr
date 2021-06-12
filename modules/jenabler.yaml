@@ -1,17 +1,18 @@
 ---
 
-header: "class jenabler { public: jenabler(input bis[8], input we, output bos[8]) ; } ;"
+header: |
+  struct jenabler { jenabler(input wire bis[8], input wire we, output wire bos[8]) ; } ;
 
 source: |
-  jenabler::jenabler(input bis[8], input we, output bos[8]){
+  jenabler::jenabler(input wire bis[8], input wire we, output wire bos[8]){
   	for (int j = 0; j < 8 ; j = j + 1){
   	  jand a(bis[j], we, bos[j]) ;
     }
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
-  wire *bos = wire::bus(8, "bos") ;
+  wire *bis = bus(8, "bis").wires() ;
+  wire *bos = bus(8, "bos").wires() ;
   wire we("we") ;
   jenabler x(bis, we, bos) ;
 

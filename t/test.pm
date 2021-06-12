@@ -10,6 +10,7 @@ sub test {
 	my $sim = shift ;
 	my $ins = shift ;
 	my $outs = shift ;
+	my $loop = shift ;
 
 	open(CASES, "<t/$sim.tdata") or die("Can't open 't/$sim.tdata' for reading: $!") ;
 	my @cases = () ;
@@ -28,7 +29,7 @@ sub test {
 
 	# Handle power-on-reset
 	settle() ;
-	setval('reset', 0) ;
+	setval('RESET', 0) ;
 	settle() ;
 
 	foreach my $case (@cases){
@@ -37,8 +38,11 @@ sub test {
 		for (my $i = 0 ; $i < scalar(@{$ins}) ; $i++){
 			setval($ins->[$i], $is[$i]) ;
 		}
+
 		my $iter = settle() ;
+		$loop->() if defined $loop ;
 		note("Settled after $iter iterations") ;
+		
 		my $wanted = $os ;
 		my @got = '' ;
 		for (my $i = 0 ; $i < scalar(@{$outs}) ; $i++){

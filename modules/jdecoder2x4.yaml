@@ -1,0 +1,25 @@
+---
+
+header: 
+source:
+
+test: |
+  wire *bis = bus(2, "bis").wires() ;
+  wire *bos = bus(4, "bos").wires() ;
+  jdecoderN x(2, 4, bis, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jdecoder2x4',
+    [bus('bis', 2)],
+    [bus('bos', 4)]) ;
+
+testdata: |
+  00=0001
+  01=0010
+  10=0100
+  11=1000

@@ -1,18 +1,19 @@
 ---
 
-header: "class jandder { public: jandder(input bas[8], input bbs[8], output bcs[8]) ; } ;"
+header: |
+  struct jandder { jandder(input wire bas[8], input wire bbs[8], output wire bcs[8]) ; } ;
 
 source: |
-  jandder::jandder(input bas[8], input bbs[8], output bcs[8]){
+  jandder::jandder(input wire bas[8], input wire bbs[8], output wire bcs[8]){
     for (int j = 0; j < 8 ; j = j + 1){
       jand nj(bas[j], bbs[j], bcs[j]) ;
     }
   }
 
 test: |
-  wire *bas = wire::bus(8, "bas") ;
-  wire *bbs = wire::bus(8, "bbs") ;
-  wire *bcs = wire::bus(8, "bcs") ;
+  wire *bas = bus(8, "bas").wires() ;
+  wire *bbs = bus(8, "bbs").wires() ;
+  wire *bcs = bus(8, "bcs").wires() ;
   jandder x(bas, bbs, bcs) ;
 
 rank: 6

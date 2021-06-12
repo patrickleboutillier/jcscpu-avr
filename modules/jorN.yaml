@@ -1,19 +1,18 @@
 ---
 
-header: "class jorN { public: jorN(int n, input bis[8], input wo) ; } ;"
+header: |
+  struct jorN { jorN(int n, input wire *bis, output wire wo) ; } ;
 
 source: |
-  jorN::jorN(int n, input bis[8], input wo){
-  	wire os[n-2] ;
-  	
-  	jor or0(bis[0], bis[1], os[0]) ;
-    for (int j = 0; j < (n-2); j = j + 1){
-      jor orj(os[j], bis[j+2], (j == (n-3) ? wo : os[j+1])) ;
+  jorN::jorN(int n, input wire *bis, output wire wo){
+  	eor x(wo) ;
+    for (int j = 0; j < n ; j = j + 1){
+      x.add_input(bis[j]) ;
     }
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
+  wire *bis = bus(8, "bis").wires() ;
   wire wo("wo") ;
   jorN x(8, bis, wo) ;
 

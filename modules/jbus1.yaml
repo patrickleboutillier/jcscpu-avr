@@ -1,0 +1,43 @@
+---
+
+header: 
+  struct jbus1 { jbus1 (input wire bis[8], input wire wbit1, output wire bos[8]) ; } ;
+
+source: |
+  jbus1::jbus1 (input wire bis[8], input wire wbit1, output wire bos[8]){
+    wire wnbit1 ;
+    jnot n(wbit1, wnbit1) ;
+  
+    for (int j = 0 ; j < 8 ; j = j + 1){
+        if (j < 7){
+            jand andj(bis[j], wnbit1, bos[j]) ;
+        } else {
+            jor orj(bis[j], wbit1, bos[j]) ;
+        }
+    }
+  }
+
+
+test: |
+  wire *bis = bus(8, "bis").wires() ;
+  wire wbit1("wbit1") ;
+  wire *bos = bus(8, "bos").wires() ;
+  jbus1 x(bis, wbit1, bos) ;
+
+rank: 6
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jbus1',
+     [bus("bis"), qw(wbit1)],
+     [bus("bos")]) ;
+
+testdata: |
+  00000000_0=00000000
+  10100001_0=10100001
+  00000001_0=00000001
+  00000001_1=00000001
+  11100001_1=00000001
+  11100100_1=00000001

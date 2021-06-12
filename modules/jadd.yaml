@@ -1,9 +1,10 @@
 ---
 
-header: "class jadd { public: jadd(input wa, input wb, input wci, output wc, output wco) ; } ;"
+header: |
+  struct jadd { jadd(input wire wa, input wire wb, input wire wci, output wire wc, output wire wco) ; } ;
 
 source: |
-  jadd::jadd(input wa, input wb, input wci, output wc, output wco){
+  jadd::jadd(input wire wa, input wire wb, input wire wci, output wire wc, output wire wco){
     wire wi, wcoa, wcob ;
     jxor xor1(wa, wb, wi) ;
     jxor xor2(wi, wci, wc) ;

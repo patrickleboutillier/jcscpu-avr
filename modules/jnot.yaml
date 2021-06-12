@@ -1,9 +1,10 @@
 ---
 
-header: "class jnot { public: jnot(input wa, input wb) ; } ;"
+header: |
+  struct jnot { jnot(input wire wa, output wire wb) ; } ;
 
 source: |
-  jnot::jnot(input wa, input wb){
+  jnot::jnot(input wire wa, output wire wb){
   	jnand x(wa, wa, wb) ;
   }
 

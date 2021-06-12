@@ -1,9 +1,9 @@
 ---
 
-header: "class jxor { public: jxor(input wa, input wb, output wc) ; } ;"
+header: "class jxor { public: jxor(input wire wa, input wire wb, output wire wc) ; } ;"
 
 source: |
-  jxor::jxor(input wa, input wb, output wc){
+  jxor::jxor(input wire wa, input wire wb, output wire wc){
     wire wic, wid, wie, wif ;
     jnot not1(wa, wic) ;
     jnot not2(wb, wid) ;

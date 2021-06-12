@@ -1,19 +1,20 @@
 ---
 
-header: "class jbyte { public: jbyte(input bis[8], input ws, output bos[8]) ; } ;"
+header: |
+  struct jbyte { jbyte(input wire bis[8], input wire ws, output wire bos[8]) ; } ;
 
 source: |
-  jbyte::jbyte(input bis[8], input ws, output bos[8]){
+  jbyte::jbyte(input wire bis[8], input wire ws, output wire bos[8]){
   	for (int j = 0; j < 8 ; j = j + 1){
   		jmemory mem(bis[j], ws, bos[j]) ;
     }
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
-  wire *bos = wire::bus(8, "bos") ;
+  wire *bis = bus(8, "bis").wires() ;
+  wire *bos = bus(8, "bos").wires() ;
   wire ws("ws"), wsr("wsr") ;
-  jor wsro(ws, wire::reset(), wsr) ;
+  jor wsro(ws, wire::reset, wsr) ;
   jbyte x(bis, wsr, bos) ;
 
 rank: 6

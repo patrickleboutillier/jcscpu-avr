@@ -6,9 +6,8 @@ use Data::Dumper ;
 
 
 my @GATES = () ;
-# Special wires: 0 is ground, 1 is VCC, 2 is power-on-reset
-my @CACHE = (0, 1, 1) ;
-my %WIRES = () ;
+my @WIRES = () ;
+my %LABELS = () ;
 
 
 sub simhdl {
@@ -22,11 +21,25 @@ sub simhdl {
 
 		my ($verb, @args) = split(/\s+/, $line) ;
 		if ($verb eq 'WIRE'){
-			$WIRES{$args[1]} = $args[0] ;
+			my ($id, $v, $label) = @args ;
+			$WIRES[$id] = $v ;
+			$LABELS{$label} = $id ;
 		}
 		elsif ($verb eq 'NAND'){
-			my $nand = { type => 'NAND', a => $args[0], b => $args[1], c => $args[2] } ;
-			push @GATES, $nand ;
+			my ($id, $a, $b, $c) = @args ;
+			$GATES[$id] = { type => 'NAND', a => $a, b => $b, c => $c } ;
+		}
+		elsif ($verb eq 'BUF'){
+			my ($id, $a, $b) = @args ;
+			$GATES[$id] = { type => 'BUF', a => $a, c => $b } ;
+		}
+		elsif ($verb eq 'OR'){
+			my ($id, $a, $b, $c) = @args ;
+			$GATES[$id] = { type => 'OR', a => $a, b => $b, c => $c } ; 
+		}
+		elsif ($verb eq 'AND'){
+			my ($id, $a, $b, $c) = @args ;
+			$GATES[$id] = { type => 'AND', a => $a, b => $b, c => $c } ; 
 		}
 	}
 }
@@ -36,19 +49,18 @@ sub setval {
 	my $label = shift ;
 	my $v = shift ;
 
-	my $w = $WIRES{$label} ;
+	my $w = $LABELS{$label} ;
 	die("No wire named '$label' was found!") unless defined($w) ;
-	$CACHE[$WIRES{$label}] = $v ;
+	$WIRES[$w] = $v ;
 }
 
 
 sub getval {
 	my $label = shift ;
-	my $v = shift ;
 
-	my $w = $WIRES{$label} ;
+	my $w = $LABELS{$label} ;
 	die("No wire named '$label' was found!") unless defined($w) ;
-	return $CACHE[$WIRES{$label}] ;
+	$WIRES[$w] ;
 }
 
 
@@ -59,25 +71,61 @@ sub settle {
 	while ($change){
 		$iter++ ;
 		$change = 0 ;
-		foreach my $g (@GATES) {
+		for (my $i = 0 ; $i < scalar(@GATES) ; $i++){
+			my $g = $GATES[$i] ;
+			my $prev = $WIRES[$g->{c}] ; 
+			my $cur ;
 			if ($g->{type} eq 'NAND'){
-				my $va = $CACHE[$g->{a}] || 0 ;
-				my $vb = $CACHE[$g->{b}] || 0 ;
-				my $c = $g->{c} ;
-				if (defined($va) && defined($vb)){
-					my $prev = $CACHE[$c] ;
-					my $cur = (! ($va & $vb)) || 0 ;
-					if ((! defined($prev))||($cur != $prev)){
-						$CACHE[$c] = $cur ;
-						$change = 1 ;
-						# warn "$c changed: '$prev' -> '$cur' ($g->{a}, $g->{b})\n" ;
-					}
-				}
+				$cur = nand($g) ;
+			}
+			elsif ($g->{type} eq 'BUF'){
+				$cur = buf($g) ;
+			}
+			elsif ($g->{type} eq 'OR'){
+				$cur = or_($g) ;
+			}
+			elsif ($g->{type} eq 'AND'){
+				$cur = and_($g) ;
+			}
+
+			if ($cur != $prev){
+				$WIRES[$g->{c}] = $cur ;
+				$change = 1 ;
+				# warn "$c changed: '$prev' -> '$cur' ($g->{a}, $g->{b})\n" ;
 			}
 		}
 	}
 
 	return $iter ;
 }
+
+
+sub nand {
+	my $g = shift ;
+
+	return (($WIRES[$g->{a}] & $WIRES[$g->{b}]) ? 0 : 1) ;
+}
+
+
+sub buf {
+	my $g = shift ;
+
+	return $WIRES[$g->{a}] ;
+}
+
+
+sub or_ {
+	my $g = shift ;
+
+	return (($WIRES[$g->{a}] | $WIRES[$g->{b}]) ? 1 : 0) ;
+}
+
+
+sub and_ {
+	my $g = shift ;
+
+	return (($WIRES[$g->{a}] & $WIRES[$g->{b}]) ? 1 : 0) ;
+}
+
 
 return 1 ;

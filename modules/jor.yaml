@@ -1,13 +1,15 @@
 ---
 
-header: "class jor { public: jor(input wa, input wb, output wc) ; } ;"
+header: |
+  struct jor { jor(input wire wa, input wire wb, output wire wc) ; } ;
 
 source: |
-  jor::jor(input wa, input wb, output wc){
-    wire wic, wid ;
-    jnot n1(wa, wic) ;
-    jnot n2(wb, wid) ;
-    jnand x(wic, wid, wc) ;
+  jor::jor(input wire wa, input wire wb, output wire wc){
+    or_ x(wa, wb, wc) ;
+    //wire wic, wid ;
+    //jnot n1(wa, wic) ;
+    //jnot n2(wb, wid) ;
+    //jnand x(wic, wid, wc) ;
   }
 
 test: |

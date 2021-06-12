@@ -1,9 +1,10 @@
 ---
 
-header: "class jshiftr { public: jshiftr(input bis[8], input wci, output bos[8], output wco) ; } ;"
+header: |
+  struct jshiftr { jshiftr(input wire bis[8], input wire wci, output wire bos[8], output wire wco) ; } ;
 
 source: |
-  jshiftr::jshiftr(input bis[8], input wci, output bos[8], output wco){
+  jshiftr::jshiftr(input wire bis[8], input wire wci, output wire bos[8], output wire wco){
     jbuf b0(wci, bos[0]) ;
   	
     for (int j = 1; j < 8 ; j = j + 1){
@@ -13,8 +14,8 @@ source: |
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
-  wire *bos = wire::bus(8, "bos") ;
+  wire *bis = bus(8, "bis").wires() ;
+  wire *bos = bus(8, "bos").wires() ;
   wire wci("wci"), wco("wco") ;
   jshiftr x(bis, wci, bos, wco) ;
 

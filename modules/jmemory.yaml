@@ -1,9 +1,9 @@
 ---
 
-header: "class jmemory { public: jmemory(input wi, input ws, output wo) ; } ;"
+header: "struct jmemory { jmemory(input wire wi, input wire ws, output wire wo) ; } ;"
 
 source: |
-  jmemory::jmemory(input wi, input ws, output wo){
+  jmemory::jmemory(input wire wi, input wire ws, output wire wo){
   	wire wa, wb, wc ;
    	jnand nand1(wi, ws, wa) ;
   	jnand nand2(wa, ws, wb) ;
@@ -13,7 +13,7 @@ source: |
 
 test: |
   wire wi("wi"), ws("ws"), wo("wo"), wsr("wsr") ;
-  jor wsro(ws, wire::reset(), wsr) ;
+  jor wsro(ws, wire::reset, wsr) ;
   jmemory x(wi, wsr, wo) ;
 
 rank: 5

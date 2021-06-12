@@ -1,12 +1,13 @@
 ---
 
-header: "class jxorer { public: jxorer(input bas[8], input bbs[8], output bcs[8], output weqo, output walo) ; } ;"
+header: |
+  struct jxorer { jxorer(input wire bas[8], input wire bbs[8], output wire bcs[8], output wire weqo, output wire walo) ; } ;
 
 source: |
-  jxorer::jxorer(input bas[8], input bbs[8], output bcs[8], output weqo, output walo){
+  jxorer::jxorer(input wire bas[8], input wire bbs[8], output wire bcs[8], output wire weqo, output wire walo){
     wire teqo[7], talo[7] ;
 
-    jcmp cmp0(bas[0], bbs[0], wire::one(), wire::zero(), bcs[0], teqo[0], talo[0]) ;
+    jcmp cmp0(bas[0], bbs[0], wire::vcc, wire::gnd, bcs[0], teqo[0], talo[0]) ;
     for (int j = 1; j < 7 ; j = j + 1){
       jcmp cmpj(bas[j], bbs[j], teqo[j-1], talo[j-1], bcs[j], teqo[j], talo[j]) ;
     }
@@ -15,9 +16,9 @@ source: |
 
 
 test: |
-  wire *bas = wire::bus(8, "bas") ;
-  wire *bbs = wire::bus(8, "bbs") ;
-  wire *bcs = wire::bus(8, "bcs") ;
+  wire *bas = bus(8, "bas").wires() ;
+  wire *bbs = bus(8, "bbs").wires() ;
+  wire *bcs = bus(8, "bcs").wires() ;
   wire weqo("weqo"), walo("walo") ;
   jxorer x(bas, bbs, bcs, weqo, walo) ;
 

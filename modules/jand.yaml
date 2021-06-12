@@ -1,12 +1,14 @@
 ---
 
-header: "class jand { public: jand(input wa, input wb, output wc) ; } ;"
+header: |
+  struct jand { jand(input wire wa, input wire wb, output wire wc) ; } ;
 
 source: |
-  jand::jand(input wa, input wb, output wc){
-    wire w ;
-    jnand x(wa, wb, w) ;
-    jnot y(w, wc) ;
+  jand::jand(input wire wa, input wire wb, output wire wc){
+    and_ x(wa, wb, wc) ;
+    //wire w ;
+    //jnand x(wa, wb, w) ;
+    //jnot y(w, wc) ;
   }
 
 test: |

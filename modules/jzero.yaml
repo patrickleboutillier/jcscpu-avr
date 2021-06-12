@@ -1,16 +1,17 @@
 ---
 
-header: "class jzero { public: jzero(input bis[8], input wz) ; } ;"
+header: 
+  struct jzero { jzero(input wire bis[8], input wire wz) ; } ;
 
 source: |
-  jzero::jzero(input bis[8], input wz){
+  jzero::jzero(input wire bis[8], input wire wz){
   	wire wi ;
   	jorN orn(8, bis, wi) ;
   	jnot n(wi, wz) ;
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
+  wire *bis = bus(8, "bis").wires() ;
   wire wz("wz") ;
   jzero x(bis, wz) ;
 

@@ -1,14 +1,16 @@
 ---
 
-header: "class jcmp { public: jcmp(input wa, input wb, input weqi, input wali, output wc, output weqo, output walo) ; } ;"
+header: |
+  struct jcmp { jcmp(input wire wa, input wire wb, input wire weqi, input wire wali, output wire wc, output wire weqo, output wire walo) ; } ;
 
 source: |
-  jcmp::jcmp(input wa, input wb, input weqi, input wali, output wc, output weqo, output walo){
+  jcmp::jcmp(input wire wa, input wire wb, input wire weqi, input wire wali, output wire wc, output wire weqo, output wire walo){
     wire w23, w45 ;
     jxor xor1(wa, wb, wc) ;
     jnot not1(wc, w23) ;
     jand and1(weqi, w23, weqo) ;
-    jand3 and3(weqi, wa, wc, w45) ;
+    wire tmp[] = {weqi, wa, wc} ;
+    jandN andN(3, tmp, w45) ;
     jor or1(wali, w45, walo) ;
   }
 

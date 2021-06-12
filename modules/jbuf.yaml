@@ -1,10 +1,12 @@
 ---
 
-header: "class jbuf { public: jbuf(input wa, input wb) ; } ;"
+header: |
+  struct jbuf { jbuf(input wire wa, input wire wb) ; } ;
 
 source: |
-  jbuf::jbuf(input wa, input wb){
-  	jand x(wa, wa, wb) ;
+  jbuf::jbuf(input wire wa, output wire wb){
+  	buf x(wa, wb) ;
+    //jand x(wa, wa, wb) ;
   }
 
 test: |

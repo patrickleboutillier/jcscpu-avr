@@ -1,0 +1,238 @@
+---
+
+header: |
+  struct jCORE { jCORE (
+    input wire reset,
+    input wire clk, input wire clkd, input wire clke, input wire clks, 
+    input wire stpbus[6],
+    input wire busi[8], output wire buso[8],
+    output wire ram_mar_s, output wire ram_s, output wire ram_e,
+    output wire io_s, output wire io_e, output wire io_io, output wire io_da,
+    output wire halt) ; } ;
+
+source: |
+  jCORE::jCORE (
+    input wire reset,
+    input wire clk, input wire clkd, input wire clke, input wire clks, 
+    input wire stpbus[6],
+    input wire busi[8], output wire buso[8],
+    output wire ram_mar_s, output wire ram_s, output wire ram_e,
+    output wire io_s, output wire io_e, output wire io_io, output wire io_da,
+    output wire halt){
+  
+    busor busowor(8, buso) ;
+  
+    wire r0_s, r0_e, r1_s, r1_e, r2_s, r2_e, r3_s, r3_e ;
+    wire rst_r0_s ;
+    jor or_rst_r0_s(reset, r0_s, rst_r0_s) ;
+    jregister r0(busi, rst_r0_s, r0_e, busowor.new_input()) ;
+    wire rst_r1_s ;
+    jor or_rst_r1_s(reset, r1_s, rst_r1_s) ;
+    jregister r1(busi, rst_r1_s, r1_e, busowor.new_input()) ;
+    wire rst_r2_s ;
+    jor or_rst_r2_s(reset, r2_s, rst_r2_s) ;
+    jregister r2(busi, rst_r2_s, r2_e, busowor.new_input()) ;
+    wire rst_r3_s ;
+    jor or_rst_r3_s(reset, r3_s, rst_r3_s) ;
+    jregister r3(busi, rst_r3_s, r3_e, busowor.new_input()) ;
+  
+    wire tmp_s, bus1_bit1 ;
+    wire tmp_bus[8], bus1_bus[8] ;
+    wire rst_tmp_s ;
+    jor or_rst_tmp_s(reset, tmp_s, rst_tmp_s) ;
+    jregister tmp(busi, rst_tmp_s, wire::vcc, tmp_bus) ;
+    jbus1 bus1(tmp_bus, bus1_bit1, bus1_bus) ;
+  
+    wire alu_op[3] ;
+    wire alu_bus[8] ;
+    wire alu_ci, alu_co, alu_eqo, alu_alo, alu_z ;
+    jALU alu(busi, bus1_bus, alu_ci, alu_op, alu_bus, alu_co, alu_eqo, alu_alo, alu_z) ;
+  
+    wire flags_s ;
+    wire flags_in[8] = {alu_co, alu_alo, alu_eqo, alu_z, wire::gnd, wire::gnd, wire::gnd, wire::gnd} ;
+    wire flags_bus[8] ;
+    wire rst_flags_s ;
+    jor or_rst_flags_s(reset, flags_s, rst_flags_s) ;
+    jregister flags(flags_in, rst_flags_s, wire::vcc, flags_bus) ;
+  
+    wire acc_s, acc_e ;
+    wire rst_acc_s ;
+    jor or_rst_acc_s(reset, acc_s, rst_acc_s) ;
+    jregister acc(alu_bus, rst_acc_s, acc_e, busowor.new_input()) ;
+  
+    wire alu_ena_ci, wco ;
+    jmemory ctmp(flags_bus[7], rst_tmp_s, wco) ;
+    jand cand(wco, alu_ena_ci, alu_ci) ;
+  
+    wire iar_s, iar_e, ir_s ;
+    wire *ir_bus = bus(8, "ir_bus").wires() ;
+    wire rst_iar_s ;
+    jor or_rst_iar_s(reset, iar_s, rst_iar_s) ;
+    jregister iar(busi, rst_iar_s, iar_e, busowor.new_input()) ;
+    wire rst_ir_s ;
+    jor or_rst_ir_s(reset, ir_s, rst_ir_s) ;
+    jregister ir(busi, rst_ir_s, wire::vcc, ir_bus) ;
+  
+    wire flags_tmp[4] = {alu_co, alu_alo, alu_eqo, alu_z} ;
+    jCU cu(
+      clk, clkd, clke, clks, stpbus,
+      flags_tmp,
+      ir_bus,
+      alu_op,
+      alu_ena_ci, flags_s, tmp_s,
+      bus1_bit1, acc_s, acc_e,
+      r0_s, r0_e, r1_s, r1_e, r2_s, r2_e, r3_s, r3_e,
+      ram_mar_s, ram_s, ram_e,
+      iar_s, iar_e, ir_s, halt,
+      io_s, io_e, io_da, io_io	
+      ) ;    
+  }
+ 
+test: |
+  busor busor(8, bus(8, "bus").wires()) ;
+
+  wire clk("clk"), clkd("clkd"), clke("clke"), clks("clks") ;
+  wire *stpbus = bus(6, "stpbus").wires() ;
+  wire ram_mar_s("ram_mar_s"), ram_s("ram_s"), ram_e("ram_e") ;
+  wire halt, io_s, io_e, io_io, io_da ;
+
+  jCORE x(
+    wire::reset,
+    clk, clkd, clke, clks, stpbus,
+    busor.get_output(), busor.get_output(),
+    ram_mar_s, ram_s, ram_e,
+    io_s, io_e, io_io, io_da,
+    halt
+    ) ;
+
+
+rank: 9
+
+testperl: |
+  use strict ;
+  require test ;
+
+  my $MAR = 0 ;
+  my @RAM = (
+    0b00100000, # DATA  R0, 00010100 (20)
+    0b00010100, # ...   20
+    0b00100001, # DATA  R1, 00010110 (22)
+    0b00010110, # ...   22
+    0b10000001, # ADD   R0, R1
+  ) ;
+
+  test('jCORE',
+    [qw(clk clkd clke clks), bus('stpbus', 6)],
+    [bus('bus')],
+    sub {
+      my ($ram_mar_s, $ram_e, $ram_s) = (getval("ram_mar_s"), getval("ram_e"), getval("ram_s")) ;
+      my @bus = map { getval("bus[$_]") } (0..7) ;
+
+      if ($ram_mar_s){
+        $MAR = oct("0b" . join('', @bus)) ;
+      }
+      if ($ram_e){
+        my @val = split('', sprintf("%08b", $RAM[$MAR])) ;
+        map { setval("bus[$_]", $val[$_]) } (0..7) ;
+      }
+      if ($ram_s){
+        $RAM[$MAR] = oct("0b" . join('', @bus)) ; ;
+      }
+    }) ;  
+
+testdata: |
+  # INST 0 
+  ### STEP 1 
+  1010_100000=00000000
+  1111_100000=00000000
+  0110_100000=00000000
+  0000_100000=00000000
+  ### STEP 2 
+  1010_010000=00100000
+  1111_010000=00100000
+  0110_010000=00100000
+  0000_010000=00000000
+  ### STEP 3 
+  1010_001000=00000001
+  1111_001000=00000001
+  0110_001000=00000001
+  0000_001000=00000000
+  ### STEP 4 
+  1010_000100=00000001
+  1111_000100=00000001
+  0110_000100=00000001
+  0000_000100=00000000
+  ### STEP 5 
+  1010_000010=00010100
+  1111_000010=00010100
+  0110_000010=00010100
+  0000_000010=00000000
+  ### STEP 6 
+  1010_000001=00000010
+  1111_000001=00000010
+  0110_000001=00000010
+  0000_000001=00000000
+  # INST 1 
+  ### STEP 1 
+  1010_100000=00000010
+  1111_100000=00000010
+  0110_100000=00000010
+  0000_100000=00000000
+  ### STEP 2 
+  1010_010000=00100001
+  1111_010000=00100001
+  0110_010000=00100001
+  0000_010000=00000000
+  ### STEP 3 
+  1010_001000=00000011
+  1111_001000=00000011
+  0110_001000=00000011
+  0000_001000=00000000
+  ### STEP 4 
+  1010_000100=00000011
+  1111_000100=00000011
+  0110_000100=00000011
+  0000_000100=00000000
+  ### STEP 5 
+  1010_000010=00010110
+  1111_000010=00010110
+  0110_000010=00010110
+  0000_000010=00000000
+  ### STEP 6 
+  1010_000001=00000100
+  1111_000001=00000100
+  0110_000001=00000100
+  0000_000001=00000000
+  # INST 2 
+  ### STEP 1 
+  1010_100000=00000100
+  1111_100000=00000100
+  0110_100000=00000100
+  0000_100000=00000000
+  ### STEP 2 
+  1010_010000=10000001
+  1111_010000=10000001
+  0110_010000=10000001
+  0000_010000=00000000
+  ### STEP 3 
+  1010_001000=00000101
+  1111_001000=00000101
+  0110_001000=00000101
+  0000_001000=00000000
+  ### STEP 4 
+  1010_000100=00010110
+  1111_000100=00010110
+  0110_000100=00010110
+  0000_000100=00000000
+  ### STEP 5 
+  1010_000010=00010100
+  1111_000010=00010100
+  0110_000010=00010100
+  0000_000010=00000000
+  ### STEP 6 
+  1010_000001=00101010
+  1111_000001=00101010
+  0110_000001=00101010
+  0000_000001=00000000
+
+

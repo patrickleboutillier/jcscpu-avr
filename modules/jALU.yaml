@@ -1,82 +1,64 @@
 ---
 
 header: |
-  class jALU { public: jALU(input bas[8], input bbs[8], input wci, input bops[3], 
-    output bcs[8], output wco, output weqo, output walo, output wz) ; } ;
+  struct jALU { jALU(input wire bas[8], input wire bbs[8], input wire wci, input wire bops[3], 
+    output wire bcs[8], output wire wco, output wire weqo, output wire walo, output wire wz) ; } ;
 
 source: |
-  jALU::jALU(input bas[8], input bbs[8], input wci, input bops[3], 
-  	output bcs[8], output wco, output weqo, output walo, output wz){
+  jALU::jALU(input wire bas[8], input wire bbs[8], input wire wci, input wire bops[3], 
+  	output wire bcs[8], output wire wco, output wire weqo, output wire walo, output wire wz){
+
   	// Build the ALU circuit
-  	wire *bdec = wire::bus(8) ;
+  	wire *bdec = bus(8).wires() ;
   	jdecoderN dec(3, 8, bops, bdec) ;
   
-  	wire *bxor = wire::bus(8) ;
-  	wire *bor = wire::bus(8) ;
-  	wire *band = wire::bus(8) ;
-  	wire *bnot = wire::bus(8) ;
-  	wire *bshl = wire::bus(8) ;
-  	wire *bshr = wire::bus(8) ;
+  	busor bcsor(8, bcs) ;
   
-    wire *bcsxor = wire::bus(8) ;
+  	wire *bxor = bus(8).wires() ;  
   	jxorer xorer(bas, bbs, bxor, weqo, walo) ;
-  	jenabler enaxor(bxor, bdec[1], bcsxor) ;
-
-    wire *bcsor = wire::bus(8) ;
+  	jenabler enaxor(bxor, bdec[1], bcsor.new_input()) ;
+  
+  	wire *bor = bus(8).wires() ;
   	jorer orer(bas, bbs, bor) ;
-  	jenabler enaor(bor, bdec[2], bcsor) ;
+  	jenabler enaor(bor, bdec[2], bcsor.new_input()) ;
   
-    wire *bcsand = wire::bus(8) ;
+  	wire *band = bus(8).wires() ;  
   	jandder andder(bas, bbs, band) ;
-  	jenabler enaand(band, bdec[3], bcsand) ;
+  	jenabler enaand(band, bdec[3], bcsor.new_input()) ;
   
-    wire *bcsnot = wire::bus(8) ;
+  	wire *bnot = bus(8).wires() ;
   	jnotter n(bas, bnot)  ;
-  	jenabler enanot(bnot, bdec[4], bcsnot) ;  
+  	jenabler enanot(bnot, bdec[4], bcsor.new_input()) ;  
   
-    wire *bco = wire::bus(3) ;
-    jorN bcoorn(3, bco, wco) ;
-
+  	wire wcotmp[3] ; 
+  	jorN jorwco(3, wcotmp, wco) ;
+  
   	wire woshl ;
-    wire *bcsshl = wire::bus(8) ;
+  	wire *bshl = bus(8).wires() ;
   	jshiftl shitfl(bas, wci, bshl, woshl) ;
-  	jand sle(woshl, bdec[5], bco[0]) ;
-  	jenabler enashl(bshl, bdec[5], bcsshl) ;
+  	jand sle(woshl, bdec[5], wcotmp[0]) ;
+  	jenabler enashl(bshl, bdec[5], bcsor.new_input()) ;
   
   	wire woshr ;
-    wire *bcsshr = wire::bus(8) ;
+  	wire *bshr = bus(8).wires() ;
   	jshiftr shiftr(bas, wci, bshr, woshr) ;
-  	jand sre(woshr, bdec[6], bco[1]) ;
-  	jenabler enashr(bshr, bdec[6], bcsshr) ;
+  	jand sre(woshr, bdec[6], wcotmp[1]) ;
+  	jenabler enashr(bshr, bdec[6], bcsor.new_input()) ;
   
   	wire aco ;
   	wire acs[8] ;
-    wire *bcsadd = wire::bus(8) ;
   	jadder adder(bas, bbs, wci, acs, aco) ;
-  	jand adde(aco, bdec[7], bco[2]) ;
-  	jenabler enaadd(acs, bdec[7], bcsadd) ;
+  	jand adde(aco, bdec[7], wcotmp[2]) ;
+  	jenabler enaadd(acs, bdec[7], bcsor.new_input()) ;
   
-    // Send all the bcs* busses to bcs through 8 7-input jorNs
-    for (int j = 0 ; j < 8 ; j++){
-      wire tmp[7] ;
-      tmp[0] = bcsxor[j] ;
-      tmp[1] = bcsor[j] ;
-      tmp[2] = bcsand[j] ;
-      tmp[3] = bcsnot[j] ;
-      tmp[4] = bcsshr[j] ;
-      tmp[5] = bcsshl[j] ;
-      tmp[6] = bcsadd[j] ;
-      jorN bcoj(7, tmp, bcs[j]) ;
-    }
-
   	jzero z(bcs, wz) ;
   }
 
 test: |
-  wire *bas = wire::bus(8, "bas") ;
-  wire *bbs = wire::bus(8, "bbs") ;
-  wire *bops = wire::bus(3, "bops") ;
-  wire *bcs = wire::bus(8, "bcs") ;
+  wire *bas = bus(8, "bas").wires() ;
+  wire *bbs = bus(8, "bbs").wires() ;
+  wire *bops = bus(3, "bops").wires() ;
+  wire *bcs = bus(8, "bcs").wires() ;
   wire wci("wci"), wco("wco"), weqo("weqo"), walo("walo"), wz("wz") ;
   jALU x(bas, bbs, wci, bops, bcs, wco, weqo, walo, wz) ;
 
@@ -85,7 +67,7 @@ rank: 7
 testperl: |
   use strict ;
   require test ;
-
+  
   test('jALU',
     [bus('bas'), bus('bbs'), qw(wci), bus('bops', 3)],
     [bus('bcs'), qw(wco weqo walo wz)]) ;
@@ -95,7 +77,7 @@ testdata: |
   00000000_00000000_0_000=00000000_0101
   00000001_00000000_0_000=00000001_0010
   00000001_00000000_0_001=00000000_1011
-  00000001_00000000_0_010=00000010_0010
+  #00000001_00000000_0_010=00000010_0010
   00000001_00000000_0_011=11111110_0010
   00000001_00000000_0_100=00000000_0011
   00000001_00000000_0_101=00000001_0010

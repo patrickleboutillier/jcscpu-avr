@@ -1,19 +1,21 @@
 ---
 
-header: "class jandN { public: jandN(int n, input bis[8], input wo) ; } ;"
+header: |
+  struct jandN { jandN(int n, input wire *bis, output wire wo) ; } ;
 
 source: |
-  jandN::jandN(int n, input bis[8], input wo){
-  	wire os[n-2] ;
+  jandN::jandN(int n, input wire *bis, output wire wo){
+  	wire os[n-1] ;
   	
   	jand and0(bis[0], bis[1], os[0]) ;
     for (int j = 0; j < (n-2); j = j + 1){
-      jand andj(os[j], bis[j+2], (j == (n-3) ? wo : os[j+1])) ;
+      jand andj(os[j], bis[j+2], os[j+1]) ;
     }
+  	jbuf(os[n-2], wo) ;
   }
 
 test: |
-  wire *bis = wire::bus(8, "bis") ;
+  wire *bis = bus(8, "bis").wires() ;
   wire wo("wo") ;
   jandN x(8, bis, wo) ;
 
