@@ -36,20 +36,9 @@ nand::nand(wire a, wire b, wire c){
 }
 
 
-buf::buf(wire a, wire b){
- 	printf("BUF %d %d %d\n", gatecnt, a.id(), b.id()) ; 
-	gatecnt++ ;
-}
-
 
 or_::or_(wire a, wire b, wire c){
  	printf("OR %d %d %d %d\n", gatecnt, a.id(), b.id(), c.id()) ; 
-	gatecnt++ ;
-}
-
-
-and_::and_(wire a, wire b, wire c){
- 	printf("AND %d %d %d %d\n", gatecnt, a.id(), b.id(), c.id()) ; 
 	gatecnt++ ;
 }
 
@@ -67,7 +56,10 @@ eor::eor(wire o){
 eor::~eor(){
 	switch (_idx){
 		case 0: break ;
-		case 1: buf(*_inputs[0], *_output) ; break ;
+		case 1: {
+			or_ or0(*_inputs[0], *_inputs[0], *_output) ; 
+			break ;
+		}
 		case 2: {
 			or_ or0(*_inputs[0], *_inputs[1], *_output) ; 
 			break ;

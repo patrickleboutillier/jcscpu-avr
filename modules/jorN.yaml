@@ -5,10 +5,13 @@ header: |
 
 source: |
   jorN::jorN(int n, input wire *bis, output wire wo){
-  	eor x(wo) ;
-    for (int j = 0; j < n ; j = j + 1){
-      x.add_input(bis[j]) ;
+  	wire os[n-1] ;
+  	
+  	jor or0(bis[0], bis[1], os[0]) ;
+    for (int j = 0; j < (n-2); j = j + 1){
+      jor orj(os[j], bis[j+2], os[j+1]) ;
     }
+  	jbuf(os[n-2], wo) ;
   }
 
 test: |

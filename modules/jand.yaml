@@ -5,10 +5,10 @@ header: |
 
 source: |
   jand::jand(input wire wa, input wire wb, output wire wc){
-    and_ x(wa, wb, wc) ;
-    //wire w ;
-    //jnand x(wa, wb, w) ;
-    //jnot y(w, wc) ;
+    // and_ x(wa, wb, wc) ;
+    wire w ;
+    jnand x(wa, wb, w) ;
+    jnot y(w, wc) ;
   }
 
 test: |

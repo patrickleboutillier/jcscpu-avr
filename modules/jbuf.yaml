@@ -5,8 +5,8 @@ header: |
 
 source: |
   jbuf::jbuf(input wire wa, output wire wb){
-  	buf x(wa, wb) ;
-    //jand x(wa, wa, wb) ;
+  	// buf x(wa, wb) ;
+    jand x(wa, wa, wb) ;
   }
 
 test: |

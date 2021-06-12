@@ -29,22 +29,9 @@ class nand {
 
 
 
-class buf {
-  public:
-    buf(wire a, wire b) ;
-} ;
-
-
-
 class or_ {
   public:
     or_(wire a, wire b, wire c) ;
-} ;
-
-
-class and_ {
-  public:
-    and_(wire a, wire b, wire c) ;
 } ;
 
 

@@ -29,17 +29,9 @@ sub simhdl {
 			my ($id, $a, $b, $c) = @args ;
 			$GATES[$id] = { type => 'NAND', a => $a, b => $b, c => $c } ;
 		}
-		elsif ($verb eq 'BUF'){
-			my ($id, $a, $b) = @args ;
-			$GATES[$id] = { type => 'BUF', a => $a, c => $b } ;
-		}
 		elsif ($verb eq 'OR'){
 			my ($id, $a, $b, $c) = @args ;
 			$GATES[$id] = { type => 'OR', a => $a, b => $b, c => $c } ; 
-		}
-		elsif ($verb eq 'AND'){
-			my ($id, $a, $b, $c) = @args ;
-			$GATES[$id] = { type => 'AND', a => $a, b => $b, c => $c } ; 
 		}
 	}
 }
@@ -55,12 +47,31 @@ sub setval {
 }
 
 
+sub setbusval {
+	my $label = shift ;
+	my $val = shift ;
+	my $len = shift || 8 ;
+
+    my @vals = split('', sprintf("%0${len}b", $val)) ;
+    map { setval("${label}[$_]", $vals[$_]) } (0 .. ($len-1)) ;
+}
+
+
 sub getval {
 	my $label = shift ;
 
 	my $w = $LABELS{$label} ;
 	die("No wire named '$label' was found!") unless defined($w) ;
 	$WIRES[$w] ;
+}
+
+
+sub getbusval {
+	my $label = shift ;
+	my $len = shift || 8 ;
+
+	my @bus = map { getval("${label}[$_]") } (0 .. ($len-1)) ;
+	return oct("0b" . join('', @bus)) ;	
 }
 
 
@@ -78,14 +89,8 @@ sub settle {
 			if ($g->{type} eq 'NAND'){
 				$cur = nand($g) ;
 			}
-			elsif ($g->{type} eq 'BUF'){
-				$cur = buf($g) ;
-			}
 			elsif ($g->{type} eq 'OR'){
 				$cur = or_($g) ;
-			}
-			elsif ($g->{type} eq 'AND'){
-				$cur = and_($g) ;
 			}
 
 			if ($cur != $prev){
@@ -107,24 +112,10 @@ sub nand {
 }
 
 
-sub buf {
-	my $g = shift ;
-
-	return $WIRES[$g->{a}] ;
-}
-
-
 sub or_ {
 	my $g = shift ;
 
 	return (($WIRES[$g->{a}] | $WIRES[$g->{b}]) ? 1 : 0) ;
-}
-
-
-sub and_ {
-	my $g = shift ;
-
-	return (($WIRES[$g->{a}] & $WIRES[$g->{b}]) ? 1 : 0) ;
 }
 
 

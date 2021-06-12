@@ -61,11 +61,11 @@ source: |
     jregister acc(alu_bus, rst_acc_s, acc_e, busowor.new_input()) ;
   
     wire alu_ena_ci, wco ;
-    jmemory ctmp(flags_bus[7], rst_tmp_s, wco) ;
+    jmemory ctmp(flags_bus[0], rst_tmp_s, wco) ;
     jand cand(wco, alu_ena_ci, alu_ci) ;
   
     wire iar_s, iar_e, ir_s ;
-    wire *ir_bus = bus(8, "ir_bus").wires() ;
+    wire ir_bus[8] ;
     wire rst_iar_s ;
     jor or_rst_iar_s(reset, iar_s, rst_iar_s) ;
     jregister iar(busi, rst_iar_s, iar_e, busowor.new_input()) ;
@@ -73,7 +73,7 @@ source: |
     jor or_rst_ir_s(reset, ir_s, rst_ir_s) ;
     jregister ir(busi, rst_ir_s, wire::vcc, ir_bus) ;
   
-    wire flags_tmp[4] = {alu_co, alu_alo, alu_eqo, alu_z} ;
+    wire flags_tmp[4] = {flags_bus[0], flags_bus[1], flags_bus[2], flags_bus[3]} ;
     jCU cu(
       clk, clkd, clke, clks, stpbus,
       flags_tmp,
@@ -94,14 +94,14 @@ test: |
   wire clk("clk"), clkd("clkd"), clke("clke"), clks("clks") ;
   wire *stpbus = bus(6, "stpbus").wires() ;
   wire ram_mar_s("ram_mar_s"), ram_s("ram_s"), ram_e("ram_e") ;
-  wire halt, io_s, io_e, io_io, io_da ;
+  wire halt("halt"), io_s("io_s"), io_e("io_e"), io_da("io_da"), io_io("io_io") ;
 
   jCORE x(
     wire::reset,
     clk, clkd, clke, clks, stpbus,
     busor.get_output(), busor.get_output(),
     ram_mar_s, ram_s, ram_e,
-    io_s, io_e, io_io, io_da,
+    io_s, io_e, io_da, io_io,
     halt
     ) ;
 
@@ -125,19 +125,9 @@ testperl: |
     [qw(clk clkd clke clks), bus('stpbus', 6)],
     [bus('bus')],
     sub {
-      my ($ram_mar_s, $ram_e, $ram_s) = (getval("ram_mar_s"), getval("ram_e"), getval("ram_s")) ;
-      my @bus = map { getval("bus[$_]") } (0..7) ;
-
-      if ($ram_mar_s){
-        $MAR = oct("0b" . join('', @bus)) ;
-      }
-      if ($ram_e){
-        my @val = split('', sprintf("%08b", $RAM[$MAR])) ;
-        map { setval("bus[$_]", $val[$_]) } (0..7) ;
-      }
-      if ($ram_s){
-        $RAM[$MAR] = oct("0b" . join('', @bus)) ; ;
-      }
+      $MAR = getbusval("bus") if getval("ram_mar_s") ;
+      setbusval("bus", $RAM[$MAR]) if getval("ram_e") ;
+      $RAM[$MAR] = getbusval("bus") if getval("ram_s") ;
     }) ;  
 
 testdata: |

@@ -1,0 +1,25 @@
+---
+
+header: 
+source: 
+
+test: |
+  wire *bis = bus(3, "bis").wires() ;
+  wire wo("wo") ;
+  jorN x(3, bis, wo) ;
+
+rank: 4
+
+testperl: |
+  use strict ;
+  require test ;
+
+  test('jor3',
+     [bus("bis", 3)],
+     [qw(wo)]) ;
+
+testdata: |
+  000=0
+  001=1
+  100=1
+  111=1

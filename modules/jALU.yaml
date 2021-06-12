@@ -9,24 +9,21 @@ source: |
   	output wire bcs[8], output wire wco, output wire weqo, output wire walo, output wire wz){
 
   	// Build the ALU circuit
-  	wire *bdec = bus(8).wires() ;
+  	wire bdec[8] ;
   	jdecoderN dec(3, 8, bops, bdec) ;
   
   	busor bcsor(8, bcs) ;
   
-  	wire *bxor = bus(8).wires() ;  
+  	wire bxor[8], bor[8], band[8], bnot[8], bshl[8], bshr[8] ;  
   	jxorer xorer(bas, bbs, bxor, weqo, walo) ;
   	jenabler enaxor(bxor, bdec[1], bcsor.new_input()) ;
   
-  	wire *bor = bus(8).wires() ;
   	jorer orer(bas, bbs, bor) ;
   	jenabler enaor(bor, bdec[2], bcsor.new_input()) ;
   
-  	wire *band = bus(8).wires() ;  
   	jandder andder(bas, bbs, band) ;
   	jenabler enaand(band, bdec[3], bcsor.new_input()) ;
   
-  	wire *bnot = bus(8).wires() ;
   	jnotter n(bas, bnot)  ;
   	jenabler enanot(bnot, bdec[4], bcsor.new_input()) ;  
   
@@ -34,13 +31,11 @@ source: |
   	jorN jorwco(3, wcotmp, wco) ;
   
   	wire woshl ;
-  	wire *bshl = bus(8).wires() ;
   	jshiftl shitfl(bas, wci, bshl, woshl) ;
   	jand sle(woshl, bdec[5], wcotmp[0]) ;
   	jenabler enashl(bshl, bdec[5], bcsor.new_input()) ;
   
   	wire woshr ;
-  	wire *bshr = bus(8).wires() ;
   	jshiftr shiftr(bas, wci, bshr, woshr) ;
   	jand sre(woshr, bdec[6], wcotmp[1]) ;
   	jenabler enashr(bshr, bdec[6], bcsor.new_input()) ;
@@ -77,7 +72,7 @@ testdata: |
   00000000_00000000_0_000=00000000_0101
   00000001_00000000_0_000=00000001_0010
   00000001_00000000_0_001=00000000_1011
-  #00000001_00000000_0_010=00000010_0010
+  00000001_00000000_0_010=00000010_0010
   00000001_00000000_0_011=11111110_0010
   00000001_00000000_0_100=00000000_0011
   00000001_00000000_0_101=00000001_0010
