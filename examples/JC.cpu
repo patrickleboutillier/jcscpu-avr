@@ -1,0 +1,9 @@
+00100000 # line   1, pos   0 - DATA  R0, 00000001 (1)
+00000001 # line   2, pos   1 -       00000001 (1)
+01100000 # line   6, pos   2 - CLF
+10010000 # line   7, pos   3 - SHR   R0, R0
+01011000 # line   8, pos   4 - JC    @a (@@a)
+00001000 # line   9, pos   5 -       @a (12)
+01000000 # line  13, pos   6 - JMP   @printR1 (@@printR1)
+00000000 # line  14, pos   7 -       @printR1 (14)
+01100001 # line  26, pos   8 - HALT  (automatically inserted by jscasm)

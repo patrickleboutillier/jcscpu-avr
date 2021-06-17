@@ -14,14 +14,27 @@ wire wire::vcc = wire(1, "VCC") ;				// wire 2
 wire wire::reset = wire(1, "RESET") ;	  		// wire 3
 
 
-wire::wire(unsigned int defval, const char *label){ 
+wire::wire(bool defval, const char *label){ 
+	_assigned = false ;
+	_defval = defval ;
+	_label = (label == NULL ? NULL : strdup(label)) ;
  	_id = wirecnt++ ;
-	printf("WIRE %d %d %s\n", _id, (defval ? 1 : 0), (label != NULL ? label : "")) ;
 } ;
 
 
 wire::wire(const char *label) : wire(0, label){} ;
 wire::wire() : wire(0, NULL){} ;
+
+
+wire::~wire(){
+	printf("WIRE %d %d %s\n", _id, (_defval ? 1 : 0), (_label != NULL ? _label : "")) ;	
+}
+
+
+void wire::assign(wire other){
+	_id = other.id() ;
+	_assigned = true ;
+}
 
 
 unsigned int wire::id(){ 

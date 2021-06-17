@@ -10,14 +10,19 @@
 class wire {
   public:
     unsigned int id() ;
-    wire(unsigned int defval, const char *label) ;
+    wire(bool defval, const char *label) ;
     wire(const char *label) ;
     wire() ;
+    ~wire() ;
+    void assign(wire other) ;
     static wire vcc ;
     static wire gnd ;
     static wire reset ;
   private:
     unsigned int _id ;
+    char *_label ;
+    bool _assigned ;
+    bool _defval ;
 } ;
 
 
